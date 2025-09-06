@@ -1,0 +1,100 @@
+{
+  "name": "SuperFacts.fr - Actualités Françaises",
+  "short_name": "SuperFacts",
+  "description": "Toute l'actualité française en temps réel agrégée depuis les plus grandes sources d'information",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e40af",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "lang": "fr-FR",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Actualités du jour",
+      "short_name": "Aujourd'hui",
+      "description": "Voir les dernières actualités",
+      "url": "/?filter=today",
+      "icons": [{ "src": "/icons/shortcut-news.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Articles chauds",
+      "short_name": "Tendances",
+      "description": "Articles populaires du moment",
+      "url": "/?hot=true",
+      "icons": [{ "src": "/icons/shortcut-hot.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Mes favoris",
+      "short_name": "Favoris",
+      "description": "Articles sauvegardés",
+      "url": "/?tab=bookmarks",
+      "icons": [{ "src": "/icons/shortcut-bookmarks.png", "sizes": "96x96" }]
+    }
+  ],
+  "categories": ["news", "education", "productivity"],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshots/mobile.png", 
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}

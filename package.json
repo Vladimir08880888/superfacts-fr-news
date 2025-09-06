@@ -1,0 +1,45 @@
+{
+  "name": "superfacts-fr",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "collect-news": "node -e \"const { FrenchNewsCollector } = require('./dist/lib/news-collector.js'); const collector = new FrenchNewsCollector(); collector.collectNews().then(result => console.log('Collecté', result.newArticles, 'nouveaux articles'));\"",
+    "collect-news-ts": "npx tsx -e \"import { FrenchNewsCollector } from './src/lib/news-collector'; const collector = new FrenchNewsCollector(); collector.collectNews().then(result => console.log('Collecté', result.newArticles, 'nouveaux articles'));\"",
+    "init-ads": "npx tsx scripts/init-ads.ts"
+  },
+  "dependencies": {
+    "@next/font": "^14.2.15",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-switch": "^1.2.6",
+    "axios": "^1.11.0",
+    "cheerio": "^1.1.2",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.12",
+    "lucide-react": "^0.542.0",
+    "next": "15.5.2",
+    "node-cron": "^4.2.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "rss-parser": "^3.13.0",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.2",
+    "tailwindcss": "^4",
+    "tsx": "^4.20.5",
+    "typescript": "^5"
+  }
+}

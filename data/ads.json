@@ -1,0 +1,232 @@
+[
+  {
+    "id": "sample-banner-1",
+    "type": "banner",
+    "title": "Découvrez notre nouvelle offre",
+    "content": "Profitez de 30% de réduction sur tous nos produits tech",
+    "imageUrl": "https://via.placeholder.com/728x90/4F46E5/white?text=Banner+Ad",
+    "targetUrl": "https://example.com/promo",
+    "advertiser": {
+      "id": "advertiser-1",
+      "name": "Tech Store",
+      "email": "contact@techstore.com",
+      "company": "Tech Store SARL",
+      "website": "https://techstore.com",
+      "contactInfo": {
+        "phone": "+33 1 23 45 67 89",
+        "address": "123 Rue de la Tech",
+        "city": "Paris",
+        "country": "France",
+        "postalCode": "75001"
+      },
+      "billingInfo": {
+        "paymentMethod": "credit_card",
+        "billingCycle": "monthly",
+        "currency": "EUR"
+      },
+      "createdAt": "2025-09-06T18:50:23.162Z",
+      "isVerified": true
+    },
+    "campaign": {
+      "id": "campaign-1",
+      "name": "Promotion Printemps 2024",
+      "description": "Campagne de promotion pour le printemps",
+      "budget": 5000,
+      "dailyBudget": 100,
+      "spentAmount": 0,
+      "impressions": 0,
+      "clicks": 0,
+      "conversions": 0,
+      "startDate": "2025-09-06T18:50:23.162Z",
+      "endDate": "2025-10-06T18:50:23.162Z",
+      "status": "active"
+    },
+    "targeting": {
+      "categories": [
+        "tech",
+        "économie"
+      ],
+      "languages": [
+        "fr"
+      ],
+      "countries": [
+        "FR"
+      ],
+      "devices": [
+        "mobile",
+        "desktop",
+        "tablet"
+      ],
+      "keywords": [
+        "tech",
+        "innovation",
+        "numérique"
+      ]
+    },
+    "placement": "header",
+    "pricing": {
+      "model": "cpm",
+      "rate": 2.5,
+      "currency": "EUR",
+      "minBudget": 100
+    },
+    "status": "active",
+    "createdAt": "2025-09-06T18:50:23.162Z",
+    "updatedAt": "2025-09-06T18:50:23.162Z",
+    "startDate": "2025-09-06T18:50:23.162Z",
+    "endDate": "2025-10-06T18:50:23.162Z"
+  },
+  {
+    "id": "sample-sidebar-1",
+    "type": "banner",
+    "title": "Formation en ligne",
+    "content": "Apprenez le développement web en 3 mois. Inscription ouverte !",
+    "imageUrl": "https://via.placeholder.com/300x250/10B981/white?text=Sidebar+Ad",
+    "targetUrl": "https://example.com/formation",
+    "advertiser": {
+      "id": "advertiser-2",
+      "name": "CodeAcademy FR",
+      "email": "contact@codeacademy-fr.com",
+      "company": "CodeAcademy France",
+      "website": "https://codeacademy-fr.com",
+      "contactInfo": {
+        "phone": "+33 1 98 76 54 32",
+        "address": "456 Avenue de l'Innovation",
+        "city": "Lyon",
+        "country": "France",
+        "postalCode": "69000"
+      },
+      "billingInfo": {
+        "paymentMethod": "bank_transfer",
+        "billingCycle": "monthly",
+        "currency": "EUR"
+      },
+      "createdAt": "2025-09-06T18:50:23.162Z",
+      "isVerified": true
+    },
+    "campaign": {
+      "id": "campaign-2",
+      "name": "Campagne Formation 2024",
+      "description": "Promouvoir nos formations en développement",
+      "budget": 3000,
+      "dailyBudget": 75,
+      "spentAmount": 0,
+      "impressions": 1,
+      "clicks": 0,
+      "conversions": 0,
+      "startDate": "2025-09-06T18:50:23.162Z",
+      "endDate": "2025-10-21T18:50:23.162Z",
+      "status": "active"
+    },
+    "targeting": {
+      "categories": [
+        "tech",
+        "économie",
+        "éducation"
+      ],
+      "languages": [
+        "fr"
+      ],
+      "countries": [
+        "FR"
+      ],
+      "devices": [
+        "desktop",
+        "tablet"
+      ],
+      "keywords": [
+        "formation",
+        "développement",
+        "programmation",
+        "carrière"
+      ]
+    },
+    "placement": "sidebar",
+    "pricing": {
+      "model": "cpc",
+      "rate": 1.25,
+      "currency": "EUR",
+      "minBudget": 150
+    },
+    "status": "active",
+    "createdAt": "2025-09-06T18:50:23.162Z",
+    "updatedAt": "2025-09-06T18:50:23.162Z",
+    "startDate": "2025-09-06T18:50:23.162Z",
+    "endDate": "2025-10-21T18:50:23.162Z"
+  },
+  {
+    "id": "sample-mobile-sticky-1",
+    "type": "banner",
+    "title": "App Mobile",
+    "content": "Téléchargez notre app !",
+    "imageUrl": "https://via.placeholder.com/320x50/F59E0B/white?text=Mobile+Ad",
+    "targetUrl": "https://example.com/app",
+    "advertiser": {
+      "id": "advertiser-3",
+      "name": "AppStore FR",
+      "email": "promo@appstore-fr.com",
+      "company": "AppStore France",
+      "website": "https://appstore-fr.com",
+      "contactInfo": {
+        "phone": "+33 1 11 22 33 44",
+        "address": "789 Rue du Mobile",
+        "city": "Marseille",
+        "country": "France",
+        "postalCode": "13000"
+      },
+      "billingInfo": {
+        "paymentMethod": "credit_card",
+        "billingCycle": "monthly",
+        "currency": "EUR"
+      },
+      "createdAt": "2025-09-06T18:50:23.162Z",
+      "isVerified": true
+    },
+    "campaign": {
+      "id": "campaign-3",
+      "name": "App Mobile Promo",
+      "description": "Promotion de notre application mobile",
+      "budget": 2000,
+      "dailyBudget": 50,
+      "spentAmount": 0.0018,
+      "impressions": 1,
+      "clicks": 0,
+      "conversions": 0,
+      "startDate": "2025-09-06T18:50:23.162Z",
+      "endDate": "2025-09-26T18:50:23.162Z",
+      "status": "active"
+    },
+    "targeting": {
+      "categories": [
+        "tech",
+        "actualité"
+      ],
+      "languages": [
+        "fr"
+      ],
+      "countries": [
+        "FR"
+      ],
+      "devices": [
+        "mobile"
+      ],
+      "keywords": [
+        "mobile",
+        "app",
+        "téléchargement"
+      ]
+    },
+    "placement": "mobile_sticky",
+    "pricing": {
+      "model": "cpm",
+      "rate": 1.8,
+      "currency": "EUR",
+      "minBudget": 80
+    },
+    "status": "active",
+    "createdAt": "2025-09-06T18:50:23.162Z",
+    "updatedAt": "2025-09-06T18:50:23.162Z",
+    "startDate": "2025-09-06T18:50:23.162Z",
+    "endDate": "2025-09-26T18:50:23.162Z"
+  }
+]
