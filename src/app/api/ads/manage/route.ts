@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const adId = searchParams.get('id');
 
     if (adId) {
-      const ads = adManager.getAds();
+      const ads = await adManager.getAds();
       const ad = ads.find(a => a.id === adId);
       
       if (!ad) {
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, ad });
     }
 
-    const ads = adManager.getAds();
+    const ads = await adManager.getAds();
     return NextResponse.json({ success: true, ads });
 
   } catch (error) {

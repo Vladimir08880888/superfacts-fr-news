@@ -269,7 +269,7 @@ export class SEOManager {
       '@type': 'WebSite',
       name: this.config.siteName,
       url: this.config.siteUrl,
-      description: 'Actualités françaises en temps réel depuis les plus grandes sources d\\'information',
+      description: 'Actualités françaises en temps réel depuis les plus grandes sources d\'information',
       inLanguage: this.config.languages,
       potentialAction: {
         '@type': 'SearchAction',
@@ -305,7 +305,7 @@ export class SEOManager {
         width: 200,
         height: 60
       },
-      description: 'Plateforme d\\'actualités françaises en temps réel',
+      description: 'Plateforme d\'actualités françaises en temps réel',
       sameAs: this.config.organization.sameAs,
       contactPoint: {
         '@type': 'ContactPoint',

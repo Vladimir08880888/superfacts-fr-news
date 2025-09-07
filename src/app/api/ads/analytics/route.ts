@@ -21,10 +21,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Get performance data
-    const performanceData = adManager.getPerformance(adId, startDate, endDate);
+    const performanceData = adManager.getPerformance(adId || undefined, startDate, endDate);
     
     // Get ads data for context
-    const ads = adManager.getAds();
+    const ads = await adManager.getAds();
     const relevantAds = adId ? ads.filter(a => a.id === adId) : ads;
 
     switch (type) {

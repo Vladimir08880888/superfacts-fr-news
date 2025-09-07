@@ -5,7 +5,7 @@ import { Sparkles, TrendingUp, RefreshCw } from 'lucide-react';
 import { ArticleCard } from './ArticleCard';
 import { useRecommendations } from '@/contexts/RecommendationsContext';
 import { useTranslatedText } from '@/contexts/TranslationContext';
-import { Article } from '@/types/article';
+import { Article } from '@/lib/news-collector';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 

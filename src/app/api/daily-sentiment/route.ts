@@ -249,9 +249,9 @@ export async function GET(request: NextRequest) {
         sentimentScore: Math.round(sentimentScore * 1000) / 1000,
         articles: relatedArticles.slice(0, 3) // Les 3 premiers articles
       };
-    }).filter(topic => topic !== null && topic.count > 0)
+    }).filter((topic): topic is TrendingTopic => topic !== null && topic.count > 0)
       .sort((a, b) => b.count - a.count)
-      .slice(0, 10) as TrendingTopic[];
+      .slice(0, 10);
 
     // Articles extrêmes (les plus positifs et négatifs)
     const positiveArticles = todayArticles

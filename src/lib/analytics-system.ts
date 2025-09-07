@@ -11,7 +11,7 @@ export interface PageView {
 }
 
 export interface UserInteractionEvent {
-  type: 'click' | 'scroll' | 'search' | 'filter' | 'bookmark' | 'share' | 'like' | 'comment';
+  type: 'click' | 'scroll' | 'search' | 'filter' | 'bookmark' | 'share' | 'like' | 'dislike' | 'comment';
   target: string;
   value?: string;
   metadata?: Record<string, any>;

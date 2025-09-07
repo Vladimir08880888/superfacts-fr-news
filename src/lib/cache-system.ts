@@ -60,7 +60,8 @@ export class CacheSystem {
       
       // Si pas en mémoire, vérifier localStorage
       if (!entry) {
-        entry = this.getFromLocalStorage<T>(key);
+        const localEntry = this.getFromLocalStorage<T>(key);
+        entry = localEntry || undefined;
         if (entry) {
           // Remettre en cache mémoire si trouvé dans localStorage
           this.memoryCache.set(key, entry);

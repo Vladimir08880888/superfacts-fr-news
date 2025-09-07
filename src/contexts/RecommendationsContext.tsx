@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Article } from '@/types/article';
+import { Article } from '@/lib/news-collector';
 
 interface ReadingHistory {
   articleId: string;

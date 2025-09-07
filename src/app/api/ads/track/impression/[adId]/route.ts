@@ -3,10 +3,11 @@ import { adManager } from '@/lib/ad-manager';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { adId: string } }
+  { params }: { params: Promise<{ adId: string }> }
 ) {
+  const resolvedParams = await params;
   try {
-    const adId = params.adId;
+    const adId = resolvedParams.adId;
     
     if (!adId) {
       return NextResponse.json(
@@ -48,10 +49,11 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { adId: string } }
+  { params }: { params: Promise<{ adId: string }> }
 ) {
+  const resolvedParams = await params;
   try {
-    const adId = params.adId;
+    const adId = resolvedParams.adId;
     
     if (!adId) {
       return NextResponse.json(

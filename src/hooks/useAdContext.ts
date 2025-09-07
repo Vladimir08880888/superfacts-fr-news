@@ -6,7 +6,7 @@ import { useTranslation } from '@/contexts/TranslationContext';
 export function useAdContext(selectedCategory?: string | null) {
   const { currentLanguage } = useTranslation();
   const [userContext, setUserContext] = useState({
-    language: currentLanguage,
+    language: currentLanguage.code,
     device: 'desktop' as 'mobile' | 'desktop' | 'tablet',
     categories: selectedCategory ? [selectedCategory] : [],
     currentUrl: ''
@@ -26,7 +26,7 @@ export function useAdContext(selectedCategory?: string | null) {
 
         setUserContext(prev => ({
           ...prev,
-          language: currentLanguage,
+          language: currentLanguage.code,
           device,
           categories: selectedCategory ? [selectedCategory] : [],
           currentUrl: window.location.href

@@ -154,7 +154,7 @@ export class AutomationSystem {
   public start() {
     if (this.isRunning) return;
     
-    console.log('AutomationSystem: Démarrage du système d\\'automatisation');
+    console.log('AutomationSystem: Démarrage du système d\'automatisation');
     this.isRunning = true;
     
     // Planifier toutes les tâches activées
@@ -171,7 +171,7 @@ export class AutomationSystem {
   public stop() {
     if (!this.isRunning) return;
     
-    console.log('AutomationSystem: Arrêt du système d\\'automatisation');
+    console.log('AutomationSystem: Arrêt du système d\'automatisation');
     this.isRunning = false;
     
     // Arrêter toutes les tâches
@@ -390,7 +390,7 @@ export class AutomationSystem {
           localStorage.setItem('superfacts_user_profile', JSON.stringify(profile));
         }
       } catch (error) {
-        console.error('Erreur lors de l\\'optimisation du profil utilisateur:', error);
+        console.error('Erreur lors de l\'optimisation du profil utilisateur:', error);
       }
     }
     
@@ -510,7 +510,7 @@ export class AutomationSystem {
     try {
       localStorage.setItem('automation_history', JSON.stringify(this.taskHistory));
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde de l\\'historique:', error);
+      console.error('Erreur lors de la sauvegarde de l\'historique:', error);
     }
   }
 
@@ -521,7 +521,7 @@ export class AutomationSystem {
         this.taskHistory = JSON.parse(stored);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement de l\\'historique:', error);
+      console.error('Erreur lors du chargement de l\'historique:', error);
     }
   }
 

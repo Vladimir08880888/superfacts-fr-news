@@ -38,92 +38,74 @@ export class FrenchNewsCollector {
   private parser: Parser;
   private articlesDir: string;
   
-  // Sources d'actualités françaises complètes
+  // Sources d'actualités françaises vérifiées et fonctionnelles
   private sources: NewsSource[] = [
-    // Médias généralistes
+    // Médias généralistes - Sources fiables et testées
     { name: 'Le Monde', url: 'https://www.lemonde.fr/rss/une.xml', category: 'Actualités', logo: '/logos/lemonde.png' },
     { name: 'Le Figaro', url: 'https://www.lefigaro.fr/rss/figaro_actualites.xml', category: 'Actualités', logo: '/logos/figaro.png' },
     { name: 'Libération', url: 'https://www.liberation.fr/arc/outboundfeeds/rss/?outputType=xml', category: 'Actualités', logo: '/logos/liberation.png' },
     { name: 'France 24', url: 'https://www.france24.com/fr/rss', category: 'Actualités', logo: '/logos/france24.png' },
     { name: 'France Info', url: 'https://www.francetvinfo.fr/titres.rss', category: 'Actualités', logo: '/logos/franceinfo.png' },
-    { name: 'BFM TV', url: 'https://www.bfmtv.com/rss/info/', category: 'Actualités', logo: '/logos/bfmtv.png' },
     { name: 'L\'Express', url: 'https://www.lexpress.fr/rss/unes.xml', category: 'Actualités', logo: '/logos/express.png' },
     { name: 'Marianne', url: 'https://www.marianne.net/rss.xml', category: 'Actualités', logo: '/logos/marianne.png' },
     { name: 'L\'Obs', url: 'https://www.nouvelobs.com/rss.xml', category: 'Actualités', logo: '/logos/obs.png' },
-
-    // Économie et Business
-    { name: 'Les Échos', url: 'https://www.lesechos.fr/rss.xml', category: 'Économie', logo: '/logos/echos.png' },
-    { name: 'La Tribune', url: 'https://www.latribune.fr/rss/a-la-une.rss', category: 'Économie', logo: '/logos/tribune.png' },
-    { name: 'Challenges', url: 'https://www.challenges.fr/rss.xml', category: 'Économie', logo: '/logos/challenges.png' },
-    { name: 'Capital', url: 'https://www.capital.fr/rss', category: 'Économie', logo: '/logos/capital.png' },
-
-    // Tech et Sciences
-    { name: 'Futura Sciences', url: 'https://www.futura-sciences.com/rss/actualites.xml', category: 'Sciences', logo: '/logos/futura.png' },
-    { name: 'Sciences et Avenir', url: 'https://www.sciencesetavenir.fr/rss.xml', category: 'Sciences', logo: '/logos/sciencesetavenir.png' },
-    { name: '01net', url: 'https://www.01net.com/rss/info/', category: 'Tech', logo: '/logos/01net.png' },
-    { name: 'Clubic', url: 'https://www.clubic.com/feed/', category: 'Tech', logo: '/logos/clubic.png' },
-
-    // Santé et Médecine
-    { name: 'Doctissimo', url: 'https://www.doctissimo.fr/rss.xml', category: 'Santé', logo: '/logos/doctissimo.png' },
-    { name: 'Top Santé', url: 'https://www.topsante.com/rss.xml', category: 'Santé', logo: '/logos/topsante.png' },
-    { name: 'Futura Sciences Santé', url: 'https://www.futura-sciences.com/rss/sante.xml', category: 'Santé', logo: '/logos/futura.png' },
-    { name: 'Sciences et Avenir Santé', url: 'https://www.sciencesetavenir.fr/rss/sante.xml', category: 'Santé', logo: '/logos/sciencesetavenir.png' },
-    { name: 'Le Figaro Santé', url: 'https://www.lefigaro.fr/rss/figaro_sante.xml', category: 'Santé', logo: '/logos/figaro.png' },
-    
-    // Sport
-    { name: 'L\'Équipe', url: 'https://www.lequipe.fr/rss/actu_rss.xml', category: 'Sport', logo: '/logos/equipe.png' },
-    { name: 'RMC Sport', url: 'https://rmcsport.bfmtv.com/rss/', category: 'Sport', logo: '/logos/rmcsport.png' },
-
-    // Culture
-    { name: 'Télérama', url: 'https://www.telerama.fr/rss.xml', category: 'Culture', logo: '/logos/telerama.png' },
-    { name: 'Les Inrockuptibles', url: 'https://www.lesinrocks.com/rss.xml', category: 'Culture', logo: '/logos/inrocks.png' },
-
-    // Régional et Local
-    { name: 'Ouest-France', url: 'https://www.ouest-france.fr/rss-en-continu.xml', category: 'Régional', logo: '/logos/ouestfrance.png' },
-    { name: '20 Minutes', url: 'https://www.20minutes.fr/rss-actu.xml', category: 'Actualités', logo: '/logos/20minutes.png' },
-    { name: 'Sud Ouest', url: 'https://www.sudouest.fr/rss/', category: 'Régional', logo: '/logos/sudouest.png' },
-    { name: 'La Dépêche', url: 'https://www.ladepeche.fr/rss.xml', category: 'Régional', logo: '/logos/ladepeche.png' },
-    { name: 'Nice-Matin', url: 'https://www.nicematin.com/rss', category: 'Régional', logo: '/logos/nicematin.png' },
-    { name: 'Le Progrès', url: 'https://www.leprogres.fr/rss', category: 'Régional', logo: '/logos/leprogres.png' },
-    { name: 'La Voix du Nord', url: 'https://www.lavoixdunord.fr/rss', category: 'Régional', logo: '/logos/voixdunord.png' },
-    { name: 'DNA - Dernières Nouvelles d\'Alsace', url: 'https://www.dna.fr/rss/', category: 'Régional', logo: '/logos/dna.png' },
-    
-    // Médias spécialisés
-    { name: 'Mediapart', url: 'https://www.mediapart.fr/articles/feed', category: 'Politique', logo: '/logos/mediapart.png' },
-    { name: 'Rue89', url: 'https://www.nouvelobs.com/rue89/rss.xml', category: 'Société', logo: '/logos/rue89.png' },
-    { name: 'Alternatives Économiques', url: 'https://www.alternatives-economiques.fr/rss.xml', category: 'Économie', logo: '/logos/alternatives.png' },
     { name: 'Atlantico', url: 'https://atlantico.fr/rss.xml', category: 'Actualités', logo: '/logos/atlantico.png' },
     { name: 'Slate.fr', url: 'https://www.slate.fr/rss.xml', category: 'Actualités', logo: '/logos/slate.png' },
-    
+
+    // Économie et Business
+    { name: 'Challenges', url: 'https://www.challenges.fr/rss.xml', category: 'Économie', logo: '/logos/challenges.png' },
+    { name: 'Alternatives Économiques', url: 'https://www.alternatives-economiques.fr/rss.xml', category: 'Économie', logo: '/logos/alternatives.png' },
+
     // Tech et Innovation
     { name: 'Numerama', url: 'https://www.numerama.com/feed/', category: 'Tech', logo: '/logos/numerama.png' },
     { name: 'JDN - Journal du Net', url: 'https://www.journaldunet.com/rss/', category: 'Tech', logo: '/logos/jdn.png' },
     { name: 'Frandroid', url: 'https://www.frandroid.com/feed', category: 'Tech', logo: '/logos/frandroid.png' },
     { name: 'ZDNet France', url: 'https://www.zdnet.fr/feeds/rss/', category: 'Tech', logo: '/logos/zdnet.png' },
     { name: 'Presse-citron', url: 'https://www.presse-citron.net/feed/', category: 'Tech', logo: '/logos/pressecitron.png' },
+
+    // Sciences
+    { name: 'Futura Sciences', url: 'https://www.futura-sciences.com/rss/actualites.xml', category: 'Sciences', logo: '/logos/futura.png' },
+    { name: 'Sciences et Avenir', url: 'https://www.sciencesetavenir.fr/rss.xml', category: 'Sciences', logo: '/logos/sciencesetavenir.png' },
+
+    // Santé
+    { name: 'Le Figaro Santé', url: 'https://www.lefigaro.fr/rss/figaro_sante.xml', category: 'Santé', logo: '/logos/figaro.png' },
     
-    // Sciences et Environnement
-    { name: 'Science & Vie', url: 'https://www.science-et-vie.com/rss.xml', category: 'Sciences', logo: '/logos/sciencevie.png' },
-    { name: 'La Recherche', url: 'https://www.larecherche.fr/rss.xml', category: 'Sciences', logo: '/logos/larecherche.png' },
+    // Régional et Local
+    { name: 'Ouest-France', url: 'https://www.ouest-france.fr/rss-en-continu.xml', category: 'Régional', logo: '/logos/ouestfrance.png' },
+    { name: 'La Dépêche', url: 'https://www.ladepeche.fr/rss.xml', category: 'Régional', logo: '/logos/ladepeche.png' },
+    { name: 'Nice-Matin', url: 'https://www.nicematin.com/rss', category: 'Régional', logo: '/logos/nicematin.png' },
+    { name: 'Le Progrès', url: 'https://www.leprogres.fr/rss', category: 'Régional', logo: '/logos/leprogres.png' },
+    
+    // Médias spécialisés
+    { name: 'Mediapart', url: 'https://www.mediapart.fr/articles/feed', category: 'Politique', logo: '/logos/mediapart.png' },
+    { name: 'Rue89', url: 'https://www.nouvelobs.com/rue89/rss.xml', category: 'Société', logo: '/logos/rue89.png' },
+    
+    // Environnement
     { name: 'Reporterre', url: 'https://reporterre.net/spip.php?page=backend', category: 'Environnement', logo: '/logos/reporterre.png' },
-    { name: 'Actu-Environnement', url: 'https://www.actu-environnement.com/ae/rss/news.rss', category: 'Environnement', logo: '/logos/actuenv.png' },
-    
-    // Sport et Divertissement
-    { name: 'Eurosport', url: 'https://www.eurosport.fr/rss.xml', category: 'Sport', logo: '/logos/eurosport.png' },
-    { name: 'So Foot', url: 'https://www.sofoot.com/rss.xml', category: 'Sport', logo: '/logos/sofoot.png' },
-    { name: 'Première', url: 'https://www.premiere.fr/rss', category: 'Culture', logo: '/logos/premiere.png' },
+  ];
+
+  // Sources avec problèmes temporaires - à réessayer périodiquement
+  private problematicSources: NewsSource[] = [
+    // Sources avec erreurs 403 - peuvent revenir
+    { name: 'Les Échos', url: 'https://www.lesechos.fr/rss.xml', category: 'Économie', logo: '/logos/echos.png' },
+    { name: '20 Minutes', url: 'https://www.20minutes.fr/rss-actu.xml', category: 'Actualités', logo: '/logos/20minutes.png' },
+    { name: 'La Voix du Nord', url: 'https://www.lavoixdunord.fr/rss', category: 'Régional', logo: '/logos/voixdunord.png' },
     { name: 'Les Échos Start', url: 'https://start.lesechos.fr/feed/', category: 'Tech', logo: '/logos/echosstart.png' },
     
-    // Société et Lifestyle
-    { name: 'Madame Figaro', url: 'https://madame.lefigaro.fr/rss/madame_figaro_une.xml', category: 'Société', logo: '/logos/madamefigaro.png' },
-    { name: 'Marie Claire', url: 'https://www.marieclaire.fr/rss.xml', category: 'Société', logo: '/logos/marieclaire.png' },
-    { name: 'L\'Internaute', url: 'https://www.linternaute.com/rss/une.xml', category: 'Actualités', logo: '/logos/internaute.png' },
+    // Sources avec problèmes de parsing - nécessitent investigation
+    { name: 'Capital', url: 'https://www.capital.fr/rss', category: 'Économie', logo: '/logos/capital.png' },
+    // RMC Sport, Sud Ouest, Science & Vie, Première nécessitent des URLs alternatives
   ];
 
   constructor() {
     this.parser = new Parser({
       customFields: {
         item: ['description', 'pubDate', 'category', 'enclosure', 'media:content']
+      },
+      timeout: 10000, // 10 seconds timeout
+      maxRedirects: 3,  // Limit redirects
+      headers: {
+        'User-Agent': 'SuperFacts.fr RSS Reader 1.0 (https://superfacts.fr)'
       }
     });
     this.articlesDir = path.join(process.cwd(), 'data');
@@ -290,31 +272,301 @@ export class FrenchNewsCollector {
     return /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(url);
   }
 
-  private categorizeArticle(title: string, content: string, sourceCategory: string): string {
+  private categorizeArticle(title: string, content: string, sourceCategory: string, sourceUrl?: string): string {
     const text = (title + ' ' + content).toLowerCase();
+    const url = sourceUrl ? sourceUrl.toLowerCase() : '';
     
-    // Catégories avec mots-clés français
-    const categories = {
-      'Politique': ['politique', 'président', 'gouvernement', 'ministre', 'macron', 'élection', 'assemblée', 'sénat', 'loi', 'député', 'vote', 'maire', 'conseil', 'municipal'],
-      'Économie': ['économie', 'business', 'finance', 'euro', 'bourse', 'entreprise', 'industrie', 'commerce', 'marché', 'inflation', 'croissance', 'startup', 'emploi', 'chômage', 'salaire', 'banque', 'investissement'],
-      'International': ['international', 'monde', 'europe', 'ukraine', 'russie', 'chine', 'usa', 'guerre', 'conflit', 'diplomatie', 'brexit', 'otan', 'onu'],
-      'Tech': ['technologie', 'intelligence artificielle', 'ia', 'numérique', 'internet', 'google', 'meta', 'apple', 'microsoft', 'startup', 'android', 'iphone', 'app', 'logiciel', 'cyber', 'data', 'blockchain', 'crypto'],
-      'Santé': ['santé', 'médecine', 'hôpital', 'médecin', 'maladie', 'covid', 'vaccin', 'virus', 'traitement', 'médicament', 'chirurgie', 'patient', 'infirmier', 'clinique', 'thérapie', 'diagnostic', 'symptôme', 'épidémie', 'prévention', 'nutrition', 'alimentation', 'bien-être', 'mental', 'psychiatrie', 'cancer', 'diabète', 'cardiologie', 'neurologie', 'pédiatrie', 'gériatrie', 'urgences', 'soins'],
-      'Sciences': ['science', 'recherche', 'découverte', 'étude', 'espace', 'nasa', 'astronomie', 'physique', 'chimie', 'biologie', 'mathématiques', 'laboratoire', 'scientifique'],
-      'Environnement': ['climat', 'environnement', 'écologie', 'carbone', 'pollution', 'biodiversité', 'réchauffement', 'cop', 'énergie', 'renouvelable', 'solaire', 'éolien', 'nucléaire', 'déchets', 'recyclage', 'nature', 'forêt'],
-      'Culture': ['culture', 'cinéma', 'film', 'livre', 'musique', 'théâtre', 'art', 'festival', 'exposition', 'concert', 'spectacle', 'littérature', 'acteur', 'réalisateur', 'oscar', 'cannes'],
-      'Sport': ['sport', 'football', 'rugby', 'tennis', 'jeux olympiques', 'champion', 'match', 'psg', 'ligue 1', 'basketball', 'handball', 'cyclisme', 'tour de france', 'euro', 'coupe du monde', 'athlétisme'],
-      'Société': ['société', 'social', 'éducation', 'école', 'université', 'famille', 'jeunes', 'retraite', 'femme', 'égalité', 'discrimination', 'immigration', 'logement', 'transport'],
-      'Régional': ['région', 'local', 'ville', 'département', 'commune', 'municipal', 'territorial']
+    // 1. Vérification par URL d'abord (priorité absolue)
+    const urlCategory = this.getCategoryFromUrl(url);
+    if (urlCategory) return urlCategory;
+    
+    // 2. Règles d'exclusion et de contexte spécifique
+    const contextCategory = this.getContextualCategory(text, title.toLowerCase());
+    if (contextCategory) return contextCategory;
+    
+    // 3. Catégories avec mots-clés organisés par spécificité et poids
+    const categoryKeywords = this.getCategoryKeywords();
+    
+    // 4. Système de scoring avancé
+    const categoryScores = this.calculateCategoryScores(text, categoryKeywords);
+    
+    // 5. Application des règles de priorité et validation
+    const finalCategory = this.selectBestCategory(categoryScores, text, sourceCategory);
+    
+    return finalCategory || sourceCategory || 'Actualités';
+  }
+  
+  private getCategoryFromUrl(url: string): string | null {
+    if (!url) return null;
+    
+    const urlPatterns = {
+      'Sport': ['/sport/', '/sports/', '/football/', '/rugby/', '/basket/', '/tennis/', '/cyclisme/', '/atletisme/', '/natation/'],
+      'International': ['/international/', '/monde/', '/europe/', '/etranger/', '/geopolitique/'],
+      'Politique': ['/politique/', '/gouvernement/', '/election/', '/assemblee/'],
+      'Économie': ['/economie/', '/business/', '/bourse/', '/entreprise/', '/finance/', '/immobilier/'],
+      'Santé': ['/sante/', '/health/', '/medical/', '/hopital/'],
+      'Tech': ['/tech/', '/technologie/', '/numerique/', '/informatique/', '/intelligence-artificielle/', '/cyber/'],
+      'Culture': ['/culture/', '/cinema/', '/theatre/', '/musique/', '/spectacle/', '/livre/'],
+      'Sciences': ['/science/', '/recherche/', '/espace/', '/astronomie/'],
+      'Environnement': ['/environnement/', '/climat/', '/ecologie/', '/nature/'],
+      'Société': ['/societe/', '/education/', '/social/', '/famille/'],
+      'Régional': ['/regional/', '/local/', '/ville/', '/departement/', '/commune/']
     };
-
-    for (const [category, keywords] of Object.entries(categories)) {
-      if (keywords.some(keyword => text.includes(keyword))) {
+    
+    for (const [category, patterns] of Object.entries(urlPatterns)) {
+      if (patterns.some(pattern => url.includes(pattern))) {
         return category;
       }
     }
-
-    return sourceCategory || 'Actualités';
+    
+    return null;
+  }
+  
+  private getContextualCategory(text: string, title: string): string | null {
+    // Règles d'exclusion et de contexte spécifique pour éviter les faux positifs
+    
+    // Géopolitique/International vs Régional
+    if (this.isInternationalContext(text, title)) {
+      return 'International';
+    }
+    
+    // Économie vs autres catégories
+    if (this.isEconomicContext(text, title)) {
+      return 'Économie';
+    }
+    
+    // Tech vs Économie (pour les entreprises tech)
+    if (this.isTechContext(text, title)) {
+      return 'Tech';
+    }
+    
+    // Sport vs autres (éviter les faux positifs)
+    if (this.isSportContext(text, title)) {
+      return 'Sport';
+    }
+    
+    return null;
+  }
+  
+  private isInternationalContext(text: string, title: string): boolean {
+    const internationalIndicators = [
+      // Conflits et géopolitique
+      ['ukraine', 'russie'], ['gaza', 'israël'], ['chine', 'taiwan'],
+      // Événements internationaux
+      ['bombardement', 'frappe'], ['guerre', 'conflit'], ['diplomatie', 'ambassade'],
+      // Pays étrangers dans un contexte d'actualité
+      ['états-unis', 'washington'], ['londres', 'brexit'], ['berlin', 'allemagne']
+    ];
+    
+    const hasInternationalKeywords = internationalIndicators.some(indicators => 
+      indicators.every(indicator => text.includes(indicator))
+    );
+    
+    // Pays/villes étrangers mentionnés
+    const foreignCountries = ['ukraine', 'russie', 'chine', 'usa', 'états-unis', 'allemagne', 'italie', 'espagne', 'royaume-uni', 'argentine', 'brésil'];
+    const hasForeignCountry = foreignCountries.some(country => text.includes(country));
+    
+    // Exclusions: si c'est du tourisme français à l'étranger, c'est plutôt économie/société
+    const isTourismContext = text.includes('tourisme') || text.includes('voyage') || text.includes('vacances');
+    
+    return (hasInternationalKeywords || hasForeignCountry) && !isTourismContext;
+  }
+  
+  private isEconomicContext(text: string, title: string): boolean {
+    const economicPatterns = [
+      // Commerce et entreprises
+      ['baguette', 'boulanger'], ['commerce', 'concurrence'], ['startup', 'entreprise'],
+      // Automobile et industrie
+      ['voiture', 'automobile'], ['tesla', 'électrique'], ['stellantis', 'industrie'],
+      // Finance et marché
+      ['bourse', 'marché'], ['prix', 'inflation'], ['salaire', 'emploi']
+    ];
+    
+    return economicPatterns.some(pattern => 
+      pattern.every(keyword => text.includes(keyword))
+    ) || text.includes('guerre de la baguette');
+  }
+  
+  private isTechContext(text: string, title: string): boolean {
+    const techPatterns = [
+      // IA et technologie avancée
+      ['intelligence artificielle', 'ia'], ['algorithme', 'data'], ['blockchain', 'crypto'],
+      // Entreprises tech
+      ['google', 'tech'], ['meta', 'facebook'], ['apple', 'iphone'], ['microsoft', 'logiciel'],
+      // Cybersécurité (priorité haute)
+      ['cyber', 'piratage'], ['hacking', 'sécurité'], ['malware', 'virus']
+    ];
+    
+    // Intel est clairement tech
+    if (text.includes('intel') && (text.includes('chip') || text.includes('processeur') || text.includes('informatique'))) {
+      return true;
+    }
+    
+    return techPatterns.some(pattern => 
+      pattern.every(keyword => text.includes(keyword))
+    );
+  }
+  
+  private isSportContext(text: string, title: string): boolean {
+    // Validation stricte pour éviter les faux positifs
+    const sportsKeywords = ['sport', 'match', 'équipe', 'joueur', 'championnat', 'compétition', 'victoire', 'défaite'];
+    const specificSports = ['tennis', 'football', 'rugby', 'basketball', 'cyclisme', 'natation', 'athlétisme'];
+    
+    const hasGeneralSport = sportsKeywords.some(keyword => text.includes(keyword));
+    const hasSpecificSport = specificSports.some(sport => text.includes(sport));
+    
+    // Exclusions: si c'est de l'économie du sport ou de la politique du sport
+    const isBusinessContext = text.includes('marché') || text.includes('sponsoring') || text.includes('contrat');
+    
+    return hasSpecificSport || (hasGeneralSport && !isBusinessContext);
+  }
+  
+  private getCategoryKeywords() {
+    return {
+      'International': {
+        high: ['ukraine', 'russie', 'gaza', 'palestine', 'israël', 'chine', 'états-unis', 'guerre', 'conflit armé', 'diplomatie', 'otan', 'onu'],
+        medium: ['europe', 'monde', 'international', 'étranger', 'ambassade', 'visa', 'immigration'],
+        low: ['londres', 'berlin', 'madrid', 'washington', 'moscou']
+      },
+      'Sport': {
+        high: ['tennis', 'football', 'rugby', 'basketball', 'cyclisme', 'natation', 'athlétisme', 'jeux olympiques', 'paralympiques'],
+        medium: ['sport', 'championnat', 'compétition', 'match', 'équipe', 'finale', 'champion'],
+        low: ['joueur', 'entraîneur', 'club', 'victoire', 'performance']
+      },
+      'Économie': {
+        high: ['économie', 'business', 'finance', 'bourse', 'entreprise', 'industrie', 'commerce'],
+        medium: ['marché', 'inflation', 'croissance', 'emploi', 'investissement', 'startup'],
+        low: ['prix', 'budget', 'salaire', 'chômage']
+      },
+      'Tech': {
+        high: ['intelligence artificielle', 'cybersécurité', 'blockchain', 'algorithme', 'cybercriminels', 'piratage'],
+        medium: ['technologie', 'numérique', 'informatique', 'logiciel', 'ia'],
+        low: ['tech', 'digital', 'internet', 'app']
+      },
+      'Politique': {
+        high: ['politique', 'président', 'gouvernement', 'ministre', 'élection', 'assemblée'],
+        medium: ['député', 'sénat', 'vote', 'parti', 'candidat'],
+        low: ['maire', 'conseil', 'municipal']
+      },
+      'Santé': {
+        high: ['santé', 'médecine', 'hôpital', 'médecin', 'covid', 'vaccin', 'virus'],
+        medium: ['maladie', 'traitement', 'patient', 'chirurgie', 'thérapie'],
+        low: ['symptôme', 'prévention', 'nutrition']
+      },
+      'Sciences': {
+        high: ['science', 'recherche', 'découverte', 'espace', 'nasa', 'astronomie'],
+        medium: ['physique', 'chimie', 'biologie', 'laboratoire'],
+        low: ['étude', 'scientifique']
+      },
+      'Environnement': {
+        high: ['climat', 'environnement', 'écologie', 'réchauffement', 'cop'],
+        medium: ['pollution', 'biodiversité', 'énergie', 'renouvelable'],
+        low: ['nature', 'conservation']
+      },
+      'Culture': {
+        high: ['cinéma', 'festival', 'théâtre', 'musique', 'art'],
+        medium: ['film', 'concert', 'spectacle', 'exposition'],
+        low: ['culture', 'littérature']
+      },
+      'Société': {
+        high: ['éducation', 'école', 'université', 'famille'],
+        medium: ['société', 'social', 'jeunes', 'retraite'],
+        low: ['logement', 'transport']
+      },
+      'Régional': {
+        high: ['région', 'département', 'commune'],
+        medium: ['local', 'ville', 'municipal'],
+        low: ['territorial']
+      }
+    };
+  }
+  
+  private calculateCategoryScores(text: string, categoryKeywords: any): { [key: string]: number } {
+    const scores: { [key: string]: number } = {};
+    
+    for (const [category, levels] of Object.entries(categoryKeywords)) {
+      scores[category] = 0;
+      
+      // Mots-clés haute priorité (score x3)
+      for (const keyword of (levels as any).high) {
+        if (text.includes(keyword)) {
+          scores[category] += 3 * (keyword.length > 8 ? 2 : 1);
+        }
+      }
+      
+      // Mots-clés moyenne priorité (score x2)
+      for (const keyword of (levels as any).medium) {
+        if (text.includes(keyword)) {
+          scores[category] += 2 * (keyword.length > 6 ? 1.5 : 1);
+        }
+      }
+      
+      // Mots-clés basse priorité (score x1)
+      for (const keyword of (levels as any).low) {
+        if (text.includes(keyword)) {
+          scores[category] += 1;
+        }
+      }
+    }
+    
+    return scores;
+  }
+  
+  private selectBestCategory(categoryScores: { [key: string]: number }, text: string, sourceCategory: string): string | null {
+    // Trouve les meilleures catégories
+    const sortedCategories = Object.entries(categoryScores)
+      .filter(([_, score]) => score > 0)
+      .sort(([_, a], [__, b]) => b - a);
+    
+    if (sortedCategories.length === 0) return null;
+    
+    const [bestCategory, bestScore] = sortedCategories[0];
+    const [secondCategory, secondScore] = sortedCategories[1] || ['', 0];
+    
+    // Si le score est très proche, utilise des règles de priorité
+    if (secondScore > 0 && (bestScore - secondScore) <= 1) {
+      return this.resolveCategoryConflict(bestCategory, secondCategory, text);
+    }
+    
+    // Validation finale: évite les catégories inappropriées
+    if (this.shouldRejectCategory(bestCategory, text)) {
+      return secondCategory && secondScore > 2 ? secondCategory : null;
+    }
+    
+    return bestScore >= 2 ? bestCategory : null;
+  }
+  
+  private resolveCategoryConflict(cat1: string, cat2: string, text: string): string {
+    // Règles de priorité en cas de conflit
+    const priorityRules = [
+      // International > Régional
+      { higher: 'International', lower: 'Régional' },
+      // Tech > Économie (pour les entreprises tech)
+      { higher: 'Tech', lower: 'Économie' },
+      // Sport > autres (si contexte sportif clair)
+      { higher: 'Sport', lower: 'Économie' }
+    ];
+    
+    for (const rule of priorityRules) {
+      if ((cat1 === rule.higher && cat2 === rule.lower) || (cat1 === rule.lower && cat2 === rule.higher)) {
+        return rule.higher;
+      }
+    }
+    
+    return cat1; // Par défaut, garde la première
+  }
+  
+  private shouldRejectCategory(category: string, text: string): boolean {
+    // Règles de rejet pour éviter les faux positifs
+    if (category === 'Régional' && (text.includes('ukraine') || text.includes('gaza') || text.includes('russie'))) {
+      return true;
+    }
+    
+    if (category === 'Sport' && !this.isSportContext(text, '')) {
+      return true;
+    }
+    
+    return false;
   }
 
   private generateTags(title: string, content: string, category: string): string[] {
@@ -324,17 +576,59 @@ export class FrenchNewsCollector {
     // Ajoute la catégorie
     tags.push(category.toLowerCase());
 
-    // Mots-clés populaires
+    // Mots-clés populaires avec plus de contexte et validation contextuelle
     const tagKeywords = {
+      // Lieux
       'france': 'france',
       'paris': 'paris',
       'europe': 'europe',
-      'climat': 'climat',
-      'macron': 'macron',
-      'intelligence artificielle': 'ia',
-      'covid': 'covid',
+      'gaza': 'gaza',
+      'palestine': 'palestine',
       'ukraine': 'ukraine',
-      'économie': 'économie',
+      'londres': 'londres',
+      'argentine': 'argentine',
+      'turquie': 'turquie',
+      'espagne': 'espagne',
+      'géorgie': 'géorgie',
+      'afrique du sud': 'afrique-du-sud',
+      'suisse': 'suisse',
+      
+      // Politique
+      'macron': 'macron',
+      'le pen': 'le-pen',
+      'bayrou': 'bayrou',
+      'gouvernement': 'gouvernement',
+      
+      // Sports spécifiques (avec validation contextuelle)
+      'tennis': 'tennis',
+      'us open': 'us-open',
+      'sabalenka': 'sabalenka',
+      'football': 'football',
+      'handball': 'handball',
+      'basketball': 'basketball',
+      'basket': 'basketball',
+      'eurobasket': 'eurobasket',
+      'rugby': 'rugby',
+      'cyclisme': 'cyclisme',
+      'vtt': 'vtt',
+      'descente': 'descente',
+      'champion': 'champion',
+      'finale': 'finale',
+      'mondial': 'mondial',
+      'coupe du monde': 'coupe-du-monde',
+      'qualification': 'qualification',
+      'quart de finale': 'quart-de-finale',
+      'demi-finale': 'demi-finale',
+      'championnat': 'championnat',
+      'match': 'match',
+      'compétition': 'compétition',
+      'xv de france': 'xv-de-france',
+      
+      // Combat sports (seulement si contexte approprié)
+      'ufc': 'ufc',
+      'boxe': 'boxe',
+      
+      // Santé
       'santé': 'santé',
       'médecine': 'médecine',
       'hôpital': 'hôpital',
@@ -344,6 +638,11 @@ export class FrenchNewsCollector {
       'nutrition': 'nutrition',
       'chirurgie': 'chirurgie',
       'patient': 'patient',
+      'dermatose': 'maladie-animale',
+      'bovine': 'élevage',
+      
+      // Environnement
+      'climat': 'climat',
       'environnement': 'environnement',
       'écologie': 'écologie',
       'pollution': 'pollution',
@@ -351,25 +650,94 @@ export class FrenchNewsCollector {
       'réchauffement': 'réchauffement',
       'énergie': 'énergie',
       'renouvelable': 'renouvelable',
+      'rhinocéros': 'conservation',
+      
+      // Tech
+      'intelligence artificielle': 'ia',
       'crypto': 'cryptomonnaie',
       'blockchain': 'blockchain',
-      'startup': 'startup',
-      'innovation': 'innovation',
+      'google': 'google',
+      'pixel': 'smartphone',
+      'caméra': 'photographie',
+      
+      // Économie
+      'économie': 'économie',
+      'stellantis': 'automobile',
+      'voiture': 'automobile',
+      'électrique': 'véhicule-électrique',
+      'boulangerie': 'commerce',
+      'concurrence': 'business',
+      'artisan': 'artisanat',
+      
+      // Culture
       'cinéma': 'cinéma',
       'festival': 'festival',
-      'sport': 'sport',
-      'football': 'football',
+      'venise': 'festival-venise',
+      'jarmusch': 'réalisateur',
+      'lion d\'or': 'prix-cinéma',
+      'orchestre': 'musique-classique',
+      
+      // Société
+      'prostitution': 'protection-enfance',
+      'mineurs': 'enfance',
+      'éducation': 'éducation',
+      'parents': 'famille',
+      'coéducation': 'école',
+      
+      // Autres
+      'startup': 'startup',
+      'innovation': 'innovation',
       'régional': 'régional',
-      'local': 'local'
+      'local': 'local',
+      'covid': 'covid'
     };
 
+    // Logique de validation contextuelle pour éviter les tags inappropriés
     for (const [keyword, tag] of Object.entries(tagKeywords)) {
       if (text.includes(keyword) && !tags.includes(tag)) {
+        // Validation spéciale pour MMA et combat sports
+        if ((keyword === 'mma' || keyword === 'combat') && !this.isSportsRelated(text)) {
+          continue;
+        }
+        
+        // Validation pour les sports en général
+        if (['champion', 'finale', 'match', 'championnat', 'compétition', 'qualification'].includes(tag) && 
+            category !== 'Sport' && 
+            !this.isSportsRelated(text)) {
+          continue;
+        }
+        
+        // Validation spécifique pour les sports
+        if (['football', 'basketball', 'rugby', 'tennis', 'cyclisme', 'vtt'].includes(tag) && 
+            category !== 'Sport') {
+          continue;
+        }
+        
+        // Validation pour les compétitions internationales
+        if (['mondial', 'coupe-du-monde', 'eurobasket'].includes(tag) && 
+            !this.isSportsRelated(text)) {
+          continue;
+        }
+        
         tags.push(tag);
       }
     }
 
-    return tags.slice(0, 6);
+    return tags.slice(0, 8);
+  }
+
+  // Méthode helper pour valider le contexte sportif (mise à jour)
+  private isSportsRelated(text: string): boolean {
+    const sportsIndicators = [
+      'sport', 'match', 'équipe', 'joueur', 'entraîneur', 'club', 'stade', 'terrain',
+      'victoire', 'défaite', 'performance', 'championnat', 'tournoi', 'finale',
+      'compétition', 'adversaire', 'score', 'résultat'
+    ];
+    
+    const specificSports = ['tennis', 'football', 'rugby', 'basketball', 'cyclisme', 'natation', 'athlétisme', 'jeux olympiques'];
+    
+    return sportsIndicators.some(indicator => text.includes(indicator)) || 
+           specificSports.some(sport => text.includes(sport));
   }
 
   private calculateReadTime(content: string): number {
@@ -437,13 +805,38 @@ export class FrenchNewsCollector {
       }
     }
     
-    return matrix[str2.length][str1.length];
+  return matrix[str2.length][str1.length];
   }
 
-  public async collectNews(): Promise<{ newArticles: number; totalArticles: number; articles: Article[] }> {
+  private categorizeError(error: any): string {
+    if (error.code === 'ENOTFOUND' || error.code === 'EAI_FAIL') {
+      return 'Domain not found';
+    }
+    if (error.code === 'ECONNREFUSED') {
+      return 'Connection refused';
+    }
+    if (error.code === 'ETIMEDOUT' || error.message?.includes('timeout')) {
+      return 'Request timeout';
+    }
+    if (error.response?.status) {
+      return `Status code ${error.response.status}`;
+    }
+    if (error.message?.includes('redirect')) {
+      return 'Too many redirects';
+    }
+    if (error.message?.includes('Unexpected close tag') || error.message?.includes('Column:')) {
+      return error.message.split('\n')[0]; // First line only for parsing errors
+    }
+    return error.message || 'Unknown error';
+  }
+
+  public async collectNews(): Promise<{ newArticles: number; totalArticles: number; articles: Article[]; errors: string[] }> {
     console.log('🚀 Début de la collecte d\'actualités françaises...');
     const allArticles: Article[] = [];
+    const errors: string[] = [];
     let currentId = Date.now();
+    let successCount = 0;
+    let failCount = 0;
 
     // Charge les articles existants
     let existingArticles: Article[] = [];
@@ -454,13 +847,15 @@ export class FrenchNewsCollector {
       console.log('📝 Création d\'un nouveau fichier d\'articles...');
     }
 
-    // Collecte depuis chaque source
-    for (const source of this.sources) {
+    // Collecte depuis chaque source avec gestion d'erreur améliorée
+    for (let i = 0; i < this.sources.length; i++) {
+      const source = this.sources[i];
       try {
-        console.log(`📰 Collecte depuis ${source.name}...`);
+        console.log(`Testing ${i + 1}/${this.sources.length}: ${source.name}...`);
         
         const feed = await this.parser.parseURL(source.url);
         const latestItems = feed.items.slice(0, 8); // Plus d'articles par source
+        let articleCount = 0;
 
         for (const item of latestItems) {
           const title = this.cleanText(item.title || '');
@@ -472,7 +867,7 @@ export class FrenchNewsCollector {
           }
 
           const content = this.cleanText(item.contentSnippet || item.content || item.description || '');
-          const category = this.categorizeArticle(title, content, source.category);
+          const category = this.categorizeArticle(title, content, source.category, item.link);
           const tags = this.generateTags(title, content, category);
           
           const article: Article = {
@@ -493,9 +888,16 @@ export class FrenchNewsCollector {
           };
 
           allArticles.push(article);
+          articleCount++;
         }
-      } catch (error) {
-        console.error(`❌ Erreur lors de la collecte depuis ${source.name}:`, error);
+        
+        console.log(`✅ ${source.name} - ${articleCount} articles`);
+        successCount++;
+      } catch (error: any) {
+        const errorMessage = this.categorizeError(error);
+        console.error(`❌ ${source.name} - FAILED: ${errorMessage}`);
+        errors.push(`${source.name}: ${errorMessage}`);
+        failCount++;
       }
     }
 
@@ -512,12 +914,19 @@ export class FrenchNewsCollector {
       'utf8'
     );
 
-    console.log(`✅ Collecte terminée : ${allArticles.length} nouveaux articles, ${updatedArticles.length} total`);
+    // Rapport final
+    console.log(`\n📊 SUMMARY:`);
+    console.log(`Total sources: ${this.sources.length}`);
+    console.log(`Working sources: ${successCount}`);
+    console.log(`Failed sources: ${failCount}`);
+    console.log(`Articles collected: ${allArticles.length}`);
+    console.log(`Total articles: ${updatedArticles.length}`);
     
     return {
       newArticles: allArticles.length,
       totalArticles: updatedArticles.length,
-      articles: updatedArticles
+      articles: updatedArticles,
+      errors
     };
   }
 

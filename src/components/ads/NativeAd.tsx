@@ -163,7 +163,7 @@ export default function NativeAd({
         {/* Sponsored badge */}
         <div className="absolute top-4 left-4 z-10">
           <span className="bg-yellow-500 text-white text-xs font-medium px-3 py-1 rounded-full">
-            {sponsoredText}
+            {sponsoredText.translatedText}
           </span>
         </div>
 
@@ -220,7 +220,7 @@ export default function NativeAd({
             </div>
             
             <div className="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-              <span className="text-sm font-medium mr-1">{readMoreText}</span>
+              <span className="text-sm font-medium mr-1">{readMoreText.translatedText}</span>
               <ExternalLink className="w-4 h-4" />
             </div>
           </div>
@@ -242,7 +242,7 @@ export default function NativeAd({
         {/* Sponsored badge */}
         <div className="absolute top-3 left-3 z-10">
           <span className="bg-yellow-400 text-black text-xs font-medium px-2 py-1 rounded">
-            {sponsoredText}
+            {sponsoredText.translatedText}
           </span>
         </div>
 
