@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Header } from '@/components/Header';
 import { ArticleCard } from '@/components/ArticleCard';
 import { Article } from '@/lib/news-collector';
-import { Loader2, AlertCircle, Sparkles, TrendingUp, Clock } from 'lucide-react';
+import { Loader2, AlertCircle, Sparkles, TrendingUp, Clock, Heart, Smile, Frown, Meh } from 'lucide-react';
 import { useTranslatedText, useTranslation } from '@/contexts/TranslationContext';
 import NativeAd from '@/components/ads/NativeAd';
 import BannerAd from '@/components/ads/BannerAd';
@@ -50,6 +50,12 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [overallSentiment, setOverallSentiment] = useState<{
+    positive: number;
+    negative: number;
+    neutral: number;
+    dominant: 'positive' | 'negative' | 'neutral';
+  } | null>(null);
   
   // User context for ads
   const userContext = useAdContext(selectedCategory);
@@ -83,6 +89,52 @@ export default function Home() {
 
     setFilteredArticles(filtered);
   }, [articles, selectedCategory, searchQuery]);
+  
+  // Calculer le sentiment général
+  useEffect(() => {
+    if (filteredArticles.length === 0) {
+      setOverallSentiment(null);
+      return;
+    }
+    
+    const calculateSentiment = (text: string) => {
+      const positiveWords = ['succès', 'victoire', 'croissance', 'amélioration', 'innovation', 'record'];
+      const negativeWords = ['crise', 'échec', 'problème', 'accident', 'mort', 'violence'];
+      
+      const lowerText = text.toLowerCase();
+      let positiveScore = 0;
+      let negativeScore = 0;
+      
+      positiveWords.forEach(word => {
+        if (lowerText.includes(word)) positiveScore++;
+      });
+      
+      negativeWords.forEach(word => {
+        if (lowerText.includes(word)) negativeScore++;
+      });
+      
+      if (positiveScore > negativeScore) return 'positive';
+      if (negativeScore > positiveScore) return 'negative';
+      return 'neutral';
+    };
+    
+    let positive = 0, negative = 0, neutral = 0;
+    
+    filteredArticles.forEach(article => {
+      const sentiment = calculateSentiment(article.title + ' ' + article.summary);
+      if (sentiment === 'positive') positive++;
+      else if (sentiment === 'negative') negative++;
+      else neutral++;
+    });
+    
+    const total = positive + negative + neutral;
+    let dominant: 'positive' | 'negative' | 'neutral' = 'neutral';
+    
+    if (positive > negative && positive > neutral) dominant = 'positive';
+    else if (negative > neutral) dominant = 'negative';
+    
+    setOverallSentiment({ positive, negative, neutral, dominant });
+  }, [filteredArticles]);
 
   const loadArticles = async () => {
     try {
@@ -195,6 +247,19 @@ export default function Home() {
                 <Clock className="w-5 h-5" />
                 <span>{translatedUpdatedContinuously}</span>
               </div>
+              {overallSentiment && (
+                <div className="flex items-center gap-2">
+                  {overallSentiment.dominant === 'positive' && (
+                    <><Heart className="w-5 h-5 text-pink-300" /><span>Ambiance positive</span></>
+                  )}
+                  {overallSentiment.dominant === 'negative' && (
+                    <><Frown className="w-5 h-5 text-orange-300" /><span>Climat tendu</span></>
+                  )}
+                  {overallSentiment.dominant === 'neutral' && (
+                    <><Meh className="w-5 h-5 text-blue-300" /><span>Actualité équilibrée</span></>
+                  )}
+                </div>
+              )}
             </motion.div>
           </div>
         </div>

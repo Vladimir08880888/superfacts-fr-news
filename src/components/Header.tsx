@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Menu, X, Newspaper, TrendingUp, Globe, Zap, RefreshCw, Bookmark, Database, Smile } from 'lucide-react';
+import { Search, Menu, X, Newspaper, TrendingUp, Globe, Zap, RefreshCw, Bookmark, Database, Smile, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LanguageSelector } from './LanguageSelector';
 import { useTranslatedText, useTranslation } from '@/contexts/TranslationContext';
@@ -211,16 +211,16 @@ export function Header({ onSearch, onCategoryFilter, onCollectNews, isCollecting
                 </motion.button>
               </Link>
               
-              {/* Daily Sentiment Button */}
-              <Link href="/daily-sentiment">
+              {/* Sentiment Analysis Button */}
+              <Link href="/sentiment">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
-                  title="Analyse du sentiment quotidien"
+                  className="flex items-center gap-2 p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all duration-200 group"
+                  title="Le Cœur de l'Actualité - Analyse des sentiments"
                 >
-                  <Smile className="w-5 h-5" />
-                  <span className="hidden lg:inline text-sm font-medium">Sentiment</span>
+                  <Heart className="w-5 h-5 group-hover:animate-pulse" />
+                  <span className="hidden lg:inline text-sm font-medium">Émotions</span>
                 </motion.button>
               </Link>
               

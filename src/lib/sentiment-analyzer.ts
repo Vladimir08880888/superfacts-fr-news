@@ -6,6 +6,7 @@ import {
   KeywordSentiment,
   FRENCH_REGIONS 
 } from '@/types/sentiment';
+import { sentimentCache, CachedSentiment } from './sentiment-cache';
 
 export class SentimentAnalyzer {
   private regionalKeywords: { [region: string]: string[] } = {
@@ -25,17 +26,48 @@ export class SentimentAnalyzer {
   };
 
   private sentimentKeywords = {
-    positive: [
-      'succès', 'victoire', 'réussite', 'croissance', 'amélioration', 'innovation', 
-      'excellence', 'record', 'performance', 'progrès', 'développement', 'expansion',
-      'renaissance', 'essor', 'boom', 'triomphe', 'exploit', 'prouesse',
-      'bénéfice', 'profit', 'gain', 'hausse', 'augmentation', 'progression'
+    positive: {
+      strong: [
+        'succès', 'victoire', 'triomphe', 'excellence', 'exploit', 'prouesse',
+        'révolution', 'percée', 'miracle', 'renaissance', 'record',
+        'extraordinaire', 'exceptionnel', 'remarquable', 'formidable'
+      ],
+      moderate: [
+        'réussite', 'croissance', 'amélioration', 'innovation', 'performance',
+        'progrès', 'développement', 'expansion', 'essor', 'boom',
+        'bénéfice', 'profit', 'gain', 'hausse', 'augmentation', 'progression',
+        'optimisme', 'espoir', 'confiance', 'satisfaction', 'joie',
+        'célébration', 'honneur', 'fierté', 'accomplissement'
+      ],
+      weak: [
+        'bien', 'bon', 'mieux', 'positif', 'favorable', 'encourageant',
+        'constructif', 'bénéfique', 'utile', 'avantageux', 'prometteur'
+      ]
+    },
+    negative: {
+      strong: [
+        'catastrophe', 'tragédie', 'désastre', 'massacre', 'génocide',
+        'terrorisme', 'guerre', 'violence', 'mort', 'décès', 'meurtre',
+        'scandale', 'corruption', 'fraude', 'escroquerie', 'trahison'
+      ],
+      moderate: [
+        'crise', 'échec', 'problème', 'difficulté', 'accident', 'conflit',
+        'tension', 'chute', 'baisse', 'diminution', 'récession', 'faillite',
+        'licenciement', 'menace', 'danger', 'risque', 'inquiétude',
+        'préoccupation', 'colère', 'frustration', 'déception'
+      ],
+      weak: [
+        'mal', 'mauvais', 'pire', 'négatif', 'défavorable', 'décourageant',
+        'problématique', 'nuisible', 'désavantageux', 'préoccupant'
+      ]
+    },
+    intensifiers: [
+      'très', 'extrêmement', 'particulièrement', 'vraiment', 'absolument',
+      'complètement', 'totalement', 'énormément', 'considérablement'
     ],
-    negative: [
-      'crise', 'échec', 'problème', 'difficulté', 'catastrophe', 'accident', 
-      'mort', 'décès', 'violence', 'guerre', 'conflit', 'tension',
-      'chute', 'baisse', 'diminution', 'récession', 'faillite', 'licenciement',
-      'scandale', 'corruption', 'fraude', 'menace', 'danger', 'risque'
+    diminishers: [
+      'peu', 'légèrement', 'faiblement', 'modérément', 'relativement',
+      'assez', 'plutôt', 'quelque peu', 'un peu'
     ]
   };
 
@@ -55,34 +87,188 @@ export class SentimentAnalyzer {
     sentiment: 'positive' | 'negative' | 'neutral';
     score: number;
     confidence: number;
+    emotions?: string[];
+    intensity: 'low' | 'medium' | 'high';
   } {
-    const text = `${article.title} ${article.content}`.toLowerCase();
+    const titleText = article.title.toLowerCase();
+    const contentText = article.content.toLowerCase();
+    const fullText = `${titleText} ${contentText}`;
     
     let positiveScore = 0;
     let negativeScore = 0;
+    let emotionWords: string[] = [];
     
-    // Analyse des mots-clés avec pondération
-    this.sentimentKeywords.positive.forEach(keyword => {
-      const count = (text.match(new RegExp(keyword, 'g')) || []).length;
-      positiveScore += count * (article.title.toLowerCase().includes(keyword) ? 2 : 1);
+    // Analyse des sentiments positifs avec pondération par intensité
+    Object.entries(this.sentimentKeywords.positive).forEach(([intensity, keywords]) => {
+      if (intensity === 'strong' || intensity === 'moderate' || intensity === 'weak') {
+        const weight = intensity === 'strong' ? 3 : intensity === 'moderate' ? 2 : 1;
+        (keywords as string[]).forEach(keyword => {
+          const titleCount = (titleText.match(new RegExp(`\\b${keyword}\\b`, 'g')) || []).length;
+          const contentCount = (contentText.match(new RegExp(`\\b${keyword}\\b`, 'g')) || []).length;
+          
+          if (titleCount + contentCount > 0) {
+            emotionWords.push(keyword);
+            const baseScore = (titleCount * 2 + contentCount) * weight;
+            
+            // Vérifier les intensificateurs/diminutifs autour du mot-clé
+            const modifiedScore = this.checkModifiers(fullText, keyword, baseScore);
+            positiveScore += modifiedScore;
+          }
+        });
+      }
     });
     
-    this.sentimentKeywords.negative.forEach(keyword => {
-      const count = (text.match(new RegExp(keyword, 'g')) || []).length;
-      negativeScore += count * (article.title.toLowerCase().includes(keyword) ? 2 : 1);
+    // Analyse des sentiments négatifs avec pondération par intensité
+    Object.entries(this.sentimentKeywords.negative).forEach(([intensity, keywords]) => {
+      if (intensity === 'strong' || intensity === 'moderate' || intensity === 'weak') {
+        const weight = intensity === 'strong' ? 3 : intensity === 'moderate' ? 2 : 1;
+        (keywords as string[]).forEach(keyword => {
+          const titleCount = (titleText.match(new RegExp(`\\b${keyword}\\b`, 'g')) || []).length;
+          const contentCount = (contentText.match(new RegExp(`\\b${keyword}\\b`, 'g')) || []).length;
+          
+          if (titleCount + contentCount > 0) {
+            emotionWords.push(keyword);
+            const baseScore = (titleCount * 2 + contentCount) * weight;
+            
+            // Vérifier les intensificateurs/diminutifs autour du mot-clé
+            const modifiedScore = this.checkModifiers(fullText, keyword, baseScore);
+            negativeScore += modifiedScore;
+          }
+        });
+      }
     });
     
-    // Calcul du score final
-    const totalScore = positiveScore + negativeScore;
-    const score = totalScore === 0 ? 0 : (positiveScore - negativeScore) / totalScore;
-    const confidence = Math.min(totalScore / 5, 1); // Confiance basée sur le nombre de mots-clés trouvés
+    // Analyse contextuelle pour détecter les négations
+    const { positiveAdjusted, negativeAdjusted } = this.adjustForNegations(fullText, positiveScore, negativeScore);
     
+    // Calcul du score final normalisé
+    const totalScore = positiveAdjusted + negativeAdjusted;
+    const rawScore = totalScore === 0 ? 0 : (positiveAdjusted - negativeAdjusted) / Math.max(totalScore, 1);
+    
+    // Score final entre -1 et 1
+    const score = Math.max(-1, Math.min(1, rawScore));
+    
+    // Confiance basée sur plusieurs facteurs
+    const keywordCount = emotionWords.length;
+    const textLength = fullText.split(' ').length;
+    const confidence = Math.min(
+      (keywordCount / 10) * 0.6 + 
+      (Math.min(textLength, 100) / 100) * 0.4, 
+      1
+    );
+    
+    // Détermination du sentiment avec seuils adaptatifs
     let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral';
-    if (Math.abs(score) > 0.2) {
+    const threshold = 0.15 - (confidence * 0.05); // Seuil adaptatif basé sur la confiance
+    
+    if (Math.abs(score) > threshold) {
       sentiment = score > 0 ? 'positive' : 'negative';
     }
     
-    return { sentiment, score, confidence };
+    // Détermination de l'intensité
+    let intensity: 'low' | 'medium' | 'high' = 'low';
+    const absScore = Math.abs(score);
+    if (absScore > 0.6) intensity = 'high';
+    else if (absScore > 0.3) intensity = 'medium';
+    
+    return { 
+      sentiment, 
+      score, 
+      confidence, 
+      emotions: emotionWords.slice(0, 5), // Top 5 emotions detected
+      intensity 
+    };
+  }
+  
+  private checkModifiers(text: string, keyword: string, baseScore: number): number {
+    const keywordRegex = new RegExp(`(.{0,20})\\b${keyword}\\b(.{0,20})`, 'gi');
+    const matches = text.match(keywordRegex);
+    
+    if (!matches) return baseScore;
+    
+    let modifiedScore = baseScore;
+    
+    matches.forEach(match => {
+      const context = match.toLowerCase();
+      
+      // Vérifier les intensificateurs
+      const hasIntensifier = this.sentimentKeywords.intensifiers.some(intensifier => 
+        context.includes(intensifier)
+      );
+      
+      // Vérifier les diminutifs
+      const hasDiminisher = this.sentimentKeywords.diminishers.some(diminisher => 
+        context.includes(diminisher)
+      );
+      
+      if (hasIntensifier) {
+        modifiedScore *= 1.5; // Augmente l'intensité
+      } else if (hasDiminisher) {
+        modifiedScore *= 0.7; // Diminue l'intensité
+      }
+    });
+    
+    return modifiedScore;
+  }
+  
+  private adjustForNegations(text: string, positiveScore: number, negativeScore: number): {
+    positiveAdjusted: number;
+    negativeAdjusted: number;
+  } {
+    const negationWords = ['ne pas', 'n\'est pas', 'n\'a pas', 'jamais', 'aucun', 'sans', 'ni'];
+    const sentences = text.split(/[.!?;]/);
+    
+    let positiveAdjusted = positiveScore;
+    let negativeAdjusted = negativeScore;
+    
+    sentences.forEach(sentence => {
+      const hasNegation = negationWords.some(neg => sentence.includes(neg));
+      
+      if (hasNegation) {
+        // Si la phrase contient une négation, inverser partiellement le sentiment
+        const sentencePositive = this.countPositiveWords(sentence);
+        const sentenceNegative = this.countNegativeWords(sentence);
+        
+        if (sentencePositive > sentenceNegative) {
+          // Phrase avec mots positifs mais négation -> réduire le positif, augmenter le négatif
+          positiveAdjusted -= sentencePositive * 0.8;
+          negativeAdjusted += sentencePositive * 0.4;
+        } else if (sentenceNegative > sentencePositive) {
+          // Phrase avec mots négatifs mais négation -> réduire le négatif, augmenter le positif
+          negativeAdjusted -= sentenceNegative * 0.8;
+          positiveAdjusted += sentenceNegative * 0.4;
+        }
+      }
+    });
+    
+    return {
+      positiveAdjusted: Math.max(0, positiveAdjusted),
+      negativeAdjusted: Math.max(0, negativeAdjusted)
+    };
+  }
+  
+  private countPositiveWords(text: string): number {
+    let count = 0;
+    Object.values(this.sentimentKeywords.positive).forEach(keywords => {
+      if (Array.isArray(keywords)) {
+        keywords.forEach(keyword => {
+          count += (text.match(new RegExp(`\\b${keyword}\\b`, 'g')) || []).length;
+        });
+      }
+    });
+    return count;
+  }
+  
+  private countNegativeWords(text: string): number {
+    let count = 0;
+    Object.values(this.sentimentKeywords.negative).forEach(keywords => {
+      if (Array.isArray(keywords)) {
+        keywords.forEach(keyword => {
+          count += (text.match(new RegExp(`\\b${keyword}\\b`, 'g')) || []).length;
+        });
+      }
+    });
+    return count;
   }
 
   private extractKeywords(articles: Article[]): string[] {
@@ -134,11 +320,59 @@ export class SentimentAnalyzer {
     let overallPositive = 0;
     let overallNegative = 0;
     let overallNeutral = 0;
+    
+    // Utiliser le cache pour optimiser les performances
+    const articlesForAnalysis = articles.map(article => ({
+      id: article.id,
+      title: article.title,
+      content: article.content + ' ' + article.summary
+    }));
+    
+    const { cached, toAnalyze } = sentimentCache.analyzeBatch(articlesForAnalysis);
+    
+    // Traiter les résultats mis en cache
+    const cachedResults = new Map<string, CachedSentiment>();
+    cached.forEach(result => {
+      cachedResults.set(result.articleId, result);
+    });
+    
+    // Analyser les nouveaux articles
+    const newResults = new Map<string, any>();
+    toAnalyze.forEach(item => {
+      const article = articles.find(a => a.id === item.id);
+      if (article) {
+        const sentimentResult = this.calculateAdvancedSentiment(article);
+        newResults.set(article.id, sentimentResult);
+        
+        // Ajouter au cache
+        sentimentCache.set(article.id, article.title, item.content, {
+          sentiment: sentimentResult.sentiment,
+          score: sentimentResult.score,
+          confidence: sentimentResult.confidence,
+          intensity: sentimentResult.intensity,
+          emotions: sentimentResult.emotions
+        });
+      }
+    });
 
-    // Analyser chaque article
+    // Analyser chaque article (en utilisant le cache quand possible)
     articles.forEach(article => {
       const region = this.detectRegion(article);
-      const sentimentResult = this.calculateAdvancedSentiment(article);
+      
+      // Récupérer le résultat depuis le cache ou les nouveaux résultats
+      let sentimentResult;
+      const cached = cachedResults.get(article.id);
+      if (cached) {
+        sentimentResult = {
+          sentiment: cached.sentiment,
+          score: cached.score,
+          confidence: cached.confidence,
+          intensity: cached.intensity || 'medium',
+          emotions: cached.emotions
+        };
+      } else {
+        sentimentResult = newResults.get(article.id) || this.calculateAdvancedSentiment(article);
+      }
       
       // Mettre à jour les statistiques globales
       if (sentimentResult.sentiment === 'positive') overallPositive++;

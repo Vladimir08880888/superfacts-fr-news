@@ -3,7 +3,7 @@
 import { Article } from '@/lib/news-collector';
 import { formatDate, formatReadTime, getCategoryColor, cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { Clock, ExternalLink, TrendingUp, User, Languages, Bookmark } from 'lucide-react';
+import { Clock, ExternalLink, TrendingUp, User, Languages, Bookmark, Heart, Frown, Meh } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslatedText, useTranslation } from '@/contexts/TranslationContext';
@@ -14,9 +14,15 @@ interface ArticleCardProps {
   article: Article;
   variant?: 'default' | 'featured' | 'compact';
   index?: number;
+  sentiment?: {
+    sentiment: 'positive' | 'negative' | 'neutral';
+    score: number;
+    confidence: number;
+    intensity?: 'low' | 'medium' | 'high';
+  };
 }
 
-export function ArticleCard({ article, variant = 'default', index = 0 }: ArticleCardProps) {
+export function ArticleCard({ article, variant = 'default', index = 0, sentiment }: ArticleCardProps) {
   const { currentLanguage } = useTranslation();
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarks();
   const { translatedText: translatedTitle, isLoading: titleLoading } = useTranslatedText(article.title, [article.id]);
@@ -36,6 +42,73 @@ export function ArticleCard({ article, variant = 'default', index = 0 }: Article
       addBookmark(article);
     }
   };
+  
+  // Fonctions de sentiment
+  const getSentimentIcon = (sentiment: 'positive' | 'negative' | 'neutral') => {
+    switch (sentiment) {
+      case 'positive': return Heart;
+      case 'negative': return Frown;
+      default: return Meh;
+    }
+  };
+  
+  const getSentimentColor = (sentiment: 'positive' | 'negative' | 'neutral', intensity: 'low' | 'medium' | 'high' = 'medium') => {
+    const colors = {
+      positive: {
+        low: 'text-green-400 bg-green-50',
+        medium: 'text-green-600 bg-green-100',
+        high: 'text-green-700 bg-green-200'
+      },
+      negative: {
+        low: 'text-red-400 bg-red-50',
+        medium: 'text-red-600 bg-red-100',
+        high: 'text-red-700 bg-red-200'
+      },
+      neutral: {
+        low: 'text-gray-400 bg-gray-50',
+        medium: 'text-gray-500 bg-gray-100',
+        high: 'text-gray-600 bg-gray-200'
+      }
+    };
+    return colors[sentiment][intensity];
+  };
+  
+  const getSentimentEmoji = (sentiment: 'positive' | 'negative' | 'neutral') => {
+    switch (sentiment) {
+      case 'positive': return '😊';
+      case 'negative': return '😔';
+      default: return '😐';
+    }
+  };
+  
+  const calculateSentiment = (text: string) => {
+    if (sentiment) return sentiment;
+    
+    // Simple sentiment calculation if not provided
+    const positiveWords = ['succès', 'victoire', 'croissance', 'amélioration', 'innovation'];
+    const negativeWords = ['crise', 'échec', 'problème', 'accident', 'mort'];
+    
+    const lowerText = text.toLowerCase();
+    let positiveScore = 0;
+    let negativeScore = 0;
+    
+    positiveWords.forEach(word => {
+      if (lowerText.includes(word)) positiveScore++;
+    });
+    
+    negativeWords.forEach(word => {
+      if (lowerText.includes(word)) negativeScore++;
+    });
+    
+    if (positiveScore > negativeScore) {
+      return { sentiment: 'positive' as const, score: 0.7, confidence: 0.6, intensity: 'medium' as const };
+    } else if (negativeScore > positiveScore) {
+      return { sentiment: 'negative' as const, score: -0.7, confidence: 0.6, intensity: 'medium' as const };
+    }
+    return { sentiment: 'neutral' as const, score: 0, confidence: 0.5, intensity: 'low' as const };
+  };
+  
+  const articleSentiment = calculateSentiment(article.title + ' ' + article.summary);
   
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -113,6 +186,10 @@ export function ArticleCard({ article, variant = 'default', index = 0 }: Article
                   <span className="font-medium text-blue-600">{translatedSource}</span>
                   <span>•</span>
                   <span>{formatDate(article.publishDate)}</span>
+                  {/* Sentiment indicator */}
+                  <span className="text-lg" title={`Sentiment: ${articleSentiment.sentiment}`}>
+                    {getSentimentEmoji(articleSentiment.sentiment)}
+                  </span>
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -177,6 +254,13 @@ export function ArticleCard({ article, variant = 'default', index = 0 }: Article
             )}
             <span className={cn('px-2 py-1 text-xs font-medium rounded-full border', getCategoryColor(article.category))}>
               {translatedCategory}
+            </span>
+            {/* Sentiment badge */}
+            <span className={cn(
+              'px-2 py-1 text-xs font-medium rounded-full border backdrop-blur-sm',
+              getSentimentColor(articleSentiment.sentiment, articleSentiment.intensity || 'medium')
+            )} title={`Sentiment: ${articleSentiment.sentiment} (${Math.round(articleSentiment.confidence * 100)}%)`}>
+              {getSentimentEmoji(articleSentiment.sentiment)}
             </span>
           </div>
           
@@ -243,6 +327,12 @@ export function ArticleCard({ article, variant = 'default', index = 0 }: Article
                   </div>
                 </>
               )}
+              {/* Sentiment indicator with confidence */}
+              <span>•</span>
+              <div className="flex items-center gap-1" title={`Confiance: ${Math.round(articleSentiment.confidence * 100)}%`}>
+                <span className="text-base">{getSentimentEmoji(articleSentiment.sentiment)}</span>
+                <span className="text-xs">{Math.round(articleSentiment.confidence * 100)}%</span>
+              </div>
             </div>
             
             <div className="flex items-center gap-3">
