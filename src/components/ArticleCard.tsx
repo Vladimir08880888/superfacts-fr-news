@@ -3,12 +3,13 @@
 import { Article } from '@/lib/news-collector';
 import { formatDate, formatReadTime, getCategoryColor, cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { Clock, ExternalLink, TrendingUp, User, Languages, Bookmark, Heart, Frown, Meh } from 'lucide-react';
+import { Clock, ExternalLink, TrendingUp, User, Languages, Bookmark, Heart, Frown, Meh, Download } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslatedText, useTranslation } from '@/contexts/TranslationContext';
 import { useBookmarks } from '@/contexts/BookmarksContext';
 import SocialShare from '@/components/SocialShare';
+import { PDFGenerator } from '@/lib/pdf-generator';
 
 interface ArticleCardProps {
   article: Article;
@@ -40,6 +41,31 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
       removeBookmark(article.id);
     } else {
       addBookmark(article);
+    }
+  };
+  
+  const handlePDFDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      // Prepare translated content for PDF
+      const translatedContent = {
+        title: translatedTitle,
+        summary: translatedSummary,
+        category: translatedCategory,
+        source: translatedSource
+      };
+      
+      await PDFGenerator.downloadArticlePDF(article, {
+        includeImage: true,
+        includeTags: true,
+        includeMetadata: true,
+        fontSize: 'medium'
+      }, translatedContent);
+    } catch (error) {
+      console.error('Erreur lors de la génération du PDF:', error);
+      // You could add a toast notification here
     }
   };
   
@@ -191,20 +217,31 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
                     {getSentimentEmoji(articleSentiment.sentiment)}
                   </span>
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={handleBookmarkClick}
-                  className={cn(
-                    "p-1.5 rounded-full transition-colors duration-200",
-                    bookmarked 
-                      ? "text-yellow-500 bg-yellow-50 hover:bg-yellow-100" 
-                      : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50"
-                  )}
-                  title={bookmarked ? "Retirer des favoris" : "Ajouter aux favoris"}
-                >
-                  <Bookmark className={cn("w-3.5 h-3.5", bookmarked && "fill-current")} />
-                </motion.button>
+                <div className="flex items-center gap-1">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handlePDFDownload}
+                    className="p-1.5 rounded-full text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors duration-200"
+                    title="Télécharger en PDF"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleBookmarkClick}
+                    className={cn(
+                      "p-1.5 rounded-full transition-colors duration-200",
+                      bookmarked 
+                        ? "text-yellow-500 bg-yellow-50 hover:bg-yellow-100" 
+                        : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50"
+                    )}
+                    title={bookmarked ? "Retirer des favoris" : "Ajouter aux favoris"}
+                  >
+                    <Bookmark className={cn("w-3.5 h-3.5", bookmarked && "fill-current")} />
+                  </motion.button>
+                </div>
               </div>
             </div>
           </div>
@@ -264,8 +301,17 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
             </span>
           </div>
           
-          {/* Bookmark button */}
-          <div className="absolute top-4 right-4">
+          {/* Action buttons */}
+          <div className="absolute top-4 right-4 flex gap-2">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handlePDFDownload}
+              className="p-2 rounded-full backdrop-blur-sm text-white/70 hover:text-blue-300 hover:bg-black/20 transition-colors duration-200"
+              title="Télécharger en PDF"
+            >
+              <Download className="w-5 h-5" />
+            </motion.button>
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -336,6 +382,16 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
             </div>
             
             <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handlePDFDownload}
+                className="inline-flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                title="Télécharger en PDF"
+              >
+                <Download className="w-4 h-4" />
+                <span className="text-sm">PDF</span>
+              </motion.button>
               <SocialShare 
                 title={article.title}
                 url={`/articles/${article.id}`}
@@ -408,8 +464,17 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
           )}
         </div>
         
-        {/* Bookmark button */}
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        {/* Action buttons */}
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handlePDFDownload}
+            className="p-2 rounded-full backdrop-blur-sm text-gray-600 bg-white/90 hover:text-blue-500 hover:bg-white transition-colors duration-200"
+            title="Télécharger en PDF"
+          >
+            <Download className="w-4 h-4" />
+          </motion.button>
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -474,6 +539,16 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
           </div>
           
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handlePDFDownload}
+              className="inline-flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors duration-200"
+              title="Télécharger en PDF"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="text-sm">PDF</span>
+            </motion.button>
             <SocialShare 
               title={article.title}
               url={`/articles/${article.id}`}

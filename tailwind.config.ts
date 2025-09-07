@@ -35,6 +35,7 @@ export default {
   plugins: [
     function({ addUtilities }: { addUtilities: any }) {
       const newUtilities = {
+        // Line clamp utilities
         '.line-clamp-1': {
           'overflow': 'hidden',
           'display': '-webkit-box',
@@ -58,6 +59,25 @@ export default {
           'display': '-webkit-box',
           '-webkit-box-orient': 'vertical',
           '-webkit-line-clamp': '4',
+        },
+        // Safe area utilities for mobile devices
+        '.pt-safe': {
+          'padding-top': 'env(safe-area-inset-top)',
+        },
+        '.pb-safe': {
+          'padding-bottom': 'max(1rem, env(safe-area-inset-bottom))',
+        },
+        '.pl-safe': {
+          'padding-left': 'env(safe-area-inset-left)',
+        },
+        '.pr-safe': {
+          'padding-right': 'env(safe-area-inset-right)',
+        },
+        '.h-safe': {
+          'height': 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+        },
+        '.min-h-safe': {
+          'min-height': 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
         },
       }
       addUtilities(newUtilities)

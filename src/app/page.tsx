@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Header } from '@/components/Header';
 import { ArticleCard } from '@/components/ArticleCard';
+import SentimentButton from '@/components/SentimentButton';
 import { Article } from '@/lib/news-collector';
-import { Loader2, AlertCircle, Sparkles, TrendingUp, Clock, Heart, Smile, Frown, Meh } from 'lucide-react';
+import { Loader2, AlertCircle, Sparkles, TrendingUp, Clock } from 'lucide-react';
 import { useTranslatedText, useTranslation } from '@/contexts/TranslationContext';
 import NativeAd from '@/components/ads/NativeAd';
 import BannerAd from '@/components/ads/BannerAd';
@@ -247,19 +248,6 @@ export default function Home() {
                 <Clock className="w-5 h-5" />
                 <span>{translatedUpdatedContinuously}</span>
               </div>
-              {overallSentiment && (
-                <div className="flex items-center gap-2">
-                  {overallSentiment.dominant === 'positive' && (
-                    <><Heart className="w-5 h-5 text-pink-300" /><span>Ambiance positive</span></>
-                  )}
-                  {overallSentiment.dominant === 'negative' && (
-                    <><Frown className="w-5 h-5 text-orange-300" /><span>Climat tendu</span></>
-                  )}
-                  {overallSentiment.dominant === 'neutral' && (
-                    <><Meh className="w-5 h-5 text-blue-300" /><span>Actualité équilibrée</span></>
-                  )}
-                </div>
-              )}
             </motion.div>
           </div>
         </div>
@@ -268,6 +256,27 @@ export default function Home() {
         <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-32 -translate-y-32" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-32 translate-y-32" />
       </motion.section>
+
+      {/* Section Sentiment moderne */}
+      {overallSentiment && (
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9, duration: 0.8 }}
+          className="relative bg-gradient-to-br from-white/80 to-gray-50/80 backdrop-blur-sm py-12"
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-center">
+              <SentimentButton
+                sentiment={overallSentiment}
+                articleCount={articles.length}
+                variant="compact"
+                className="max-w-sm"
+              />
+            </div>
+          </div>
+        </motion.section>
+      )}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Gestion des erreurs */}
@@ -473,6 +482,23 @@ export default function Home() {
                         ))}
                       </div>
                     </div>
+                  </motion.section>
+                )}
+                
+                {/* Sentiment Analysis Widget */}
+                {overallSentiment && (
+                  <motion.section
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.65 }}
+                    className="mb-8"
+                  >
+                    <SentimentButton
+                      sentiment={overallSentiment}
+                      articleCount={filteredArticles.length}
+                      variant="expanded"
+                      className="w-full"
+                    />
                   </motion.section>
                 )}
                 

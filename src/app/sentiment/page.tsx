@@ -1,27 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Heart, 
-  TrendingUp, 
-  BarChart3, 
   Brain, 
-  MapPin, 
-  Calendar,
+  Activity, 
+  TrendingUp, 
+  Eye, 
+  Clock, 
+  MapPin,
   Filter,
+  BarChart3,
+  PieChart,
+  Users,
+  Layers,
   Sparkles,
-  Eye,
-  Clock,
-  Globe,
+  Target,
   Zap
 } from 'lucide-react';
 
 import { SentimentAnalysisResult } from '@/types/sentiment';
 import { Article } from '@/lib/news-collector';
-import { useTranslatedText } from '@/contexts/TranslationContext';
-import SentimentChart from '@/components/SentimentChart';
-import TopicSentimentCard from '@/components/TopicSentimentCard';
+import { useTranslation, useTranslatedText } from '@/contexts/TranslationContext';
 
 interface SentimentPageData {
   sentimentAnalysis: SentimentAnalysisResult;
@@ -52,9 +51,24 @@ export default function SentimentAnalysisPage() {
   const [loading, setLoading] = useState(true);
   const [selectedTimeframe, setSelectedTimeframe] = useState<'24h' | '7d' | '30d'>('24h');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedSentiment, setSelectedSentiment] = useState<'all' | 'positive' | 'negative' | 'neutral'>('all');
+  const [error, setError] = useState<string | null>(null);
   
-  const t = useTranslatedText;
+  const { currentLanguage } = useTranslation();
+  
+  // Translation hooks
+  const titleText = useTranslatedText('Intelligence Émotionnelle');
+  const subtitleText = useTranslatedText('Analyse des sentiments de l\'actualité française');
+  const loadingText = useTranslatedText('Analyse en cours...');
+  const errorText = useTranslatedText('Erreur de chargement');
+  const retryText = useTranslatedText('Réessayer');
+  const positiveText = useTranslatedText('Positif');
+  const neutralText = useTranslatedText('Neutre');
+  const negativeText = useTranslatedText('Négatif');
+  const articlesText = useTranslatedText('Articles');
+  const lastUpdateText = useTranslatedText('Mise à jour');
+  const hours24Text = useTranslatedText('24h');
+  const days7Text = useTranslatedText('7j');
+  const days30Text = useTranslatedText('30j');
 
   useEffect(() => {
     fetchSentimentData();
@@ -62,102 +76,53 @@ export default function SentimentAnalysisPage() {
 
   const fetchSentimentData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch(`/api/sentiment-analysis?timeframe=${selectedTimeframe}&category=${selectedCategory}`);
       if (response.ok) {
         const sentimentData = await response.json();
         setData(sentimentData);
+      } else {
+        throw new Error('Erreur de chargement');
       }
-    } catch (error) {
-      console.error('Erreur lors du chargement des données de sentiment:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
       setLoading(false);
     }
   };
 
-  const getSentimentColor = (sentiment: 'positive' | 'negative' | 'neutral', intensity: 'low' | 'medium' | 'high' = 'medium') => {
+  const getSentimentColor = (sentiment: 'positive' | 'negative' | 'neutral') => {
     const colors = {
-      positive: {
-        low: 'text-green-400 bg-green-50 border-green-200',
-        medium: 'text-green-600 bg-green-100 border-green-300',
-        high: 'text-green-800 bg-green-200 border-green-400'
-      },
-      negative: {
-        low: 'text-red-400 bg-red-50 border-red-200',
-        medium: 'text-red-600 bg-red-100 border-red-300',
-        high: 'text-red-800 bg-red-200 border-red-400'
-      },
-      neutral: {
-        low: 'text-gray-400 bg-gray-50 border-gray-200',
-        medium: 'text-gray-600 bg-gray-100 border-gray-300',
-        high: 'text-gray-800 bg-gray-200 border-gray-400'
-      }
-    } as const;
-    return colors[sentiment][intensity];
+      positive: 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white',
+      negative: 'bg-gradient-to-br from-red-500 to-pink-600 text-white',
+      neutral: 'bg-gradient-to-br from-slate-500 to-gray-600 text-white'
+    };
+    return colors[sentiment];
   };
 
   const getSentimentIcon = (sentiment: 'positive' | 'negative' | 'neutral') => {
-    switch (sentiment) {
-      case 'positive': return '😊';
-      case 'negative': return '😔';
-      default: return '😐';
-    }
+    const icons = {
+      positive: '😊',
+      negative: '😔',
+      neutral: '😐'
+    };
+    return icons[sentiment];
   };
 
-  const calculateOverallMood = (): { mood: 'positive' | 'negative' | 'neutral', intensity: 'low' | 'medium' | 'high', description: string } => {
-    if (!data) return { mood: 'neutral' as const, intensity: 'medium' as const, description: 'Analysing...' };
-    
-    const { positive, negative, neutral } = data.sentimentAnalysis.overall;
-    const total = positive + negative + neutral;
-    
-    if (total === 0) return { mood: 'neutral' as const, intensity: 'medium' as const, description: 'Pas de données' };
-    
-    const positiveRatio = positive / total;
-    const negativeRatio = negative / total;
-    
-    let mood: 'positive' | 'negative' | 'neutral' = 'neutral';
-    let intensity: 'low' | 'medium' | 'high' = 'medium';
-    let description = '';
-    
-    if (positiveRatio > 0.6) {
-      mood = 'positive';
-      intensity = 'high';
-      description = 'Ambiance très positive aujourd\'hui! 🌟';
-    } else if (positiveRatio > 0.4) {
-      mood = 'positive';
-      intensity = 'medium';
-      description = 'Climat plutôt optimiste 🙂';
-    } else if (negativeRatio > 0.6) {
-      mood = 'negative';
-      intensity = 'high';
-      description = 'Journée difficile dans l\'actualité ⛈️';
-    } else if (negativeRatio > 0.4) {
-      mood = 'negative';
-      intensity = 'medium';
-      description = 'Ambiance un peu tendue 🌥️';
-    } else {
-      mood = 'neutral';
-      intensity = 'medium';
-      description = 'Équilibre dans l\'actualité ⚖️';
-    }
-    
-    return { mood, intensity, description };
-  };
-
+  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-96">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            >
-              <Brain className="w-16 h-16 text-white" />
-            </motion.div>
-            <div className="ml-4 text-white">
-              <h2 className="text-xl font-bold">Analyse des émotions en cours...</h2>
-              <p className="text-blue-200">Décryptage de l'humeur des nouvelles françaises</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 dark:from-gray-900 dark:to-slate-800">
+        <div className="container mx-auto px-4 py-16">
+          <div className="flex flex-col items-center justify-center space-y-6">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-violet-200 dark:border-violet-800 border-t-violet-600 rounded-full animate-spin"></div>
+              <Brain className="absolute inset-0 m-auto w-8 h-8 text-violet-600" />
+            </div>
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{loadingText.translatedText}</h2>
+              <p className="text-gray-600 dark:text-gray-400">Décryptage de l'intelligence émotionnelle...</p>
             </div>
           </div>
         </div>
@@ -165,332 +130,324 @@ export default function SentimentAnalysisPage() {
     );
   }
 
-  if (!data) {
+  // Error state
+  if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <h2 className="text-2xl font-bold mb-4">Erreur de chargement</h2>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 dark:from-gray-900 dark:to-slate-800 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Brain className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{errorText.translatedText}</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
           <button
             onClick={fetchSentimentData}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-6 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl hover:from-violet-700 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
           >
-            Réessayer
+            {retryText.translatedText}
           </button>
         </div>
       </div>
     );
   }
 
-  const overallMood = calculateOverallMood();
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      {/* Hero Section - L'humeur générale */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative container mx-auto px-4 py-16 text-center text-white"
-        >
-          <div className="mb-8">
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="inline-block"
-            >
-              <Heart className="w-20 h-20 mx-auto mb-4 text-pink-400" />
-            </motion.div>
-            <h1 className="text-5xl md:text-7xl font-bold mb-4">
-              Le Cœur de l'Actualité
-            </h1>
-            <p className="text-xl md:text-2xl text-blue-200 mb-8">
-              L'intelligence émotionnelle des nouvelles françaises
-            </p>
-          </div>
-
-          {/* Carte de l'humeur générale */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className={`inline-block px-8 py-6 rounded-2xl border-2 ${getSentimentColor(overallMood.mood, overallMood.intensity)} backdrop-blur-lg`}
-          >
-            <div className="text-4xl mb-2">{getSentimentIcon(overallMood.mood)}</div>
-            <h3 className="text-2xl font-bold mb-2">Ambiance Générale</h3>
-            <p className="text-lg">{overallMood.description}</p>
-            <div className="mt-4 flex justify-center space-x-4 text-sm">
-              <span>😊 {data.sentimentAnalysis.overall.positive}</span>
-              <span>😐 {data.sentimentAnalysis.overall.neutral}</span>
-              <span>😔 {data.sentimentAnalysis.overall.negative}</span>
-            </div>
-          </motion.div>
-        </motion.div>
-      </div>
-
-      {/* Contrôles et filtres */}
-      <div className="bg-black bg-opacity-30 backdrop-blur-lg border-t border-white border-opacity-20">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-wrap gap-4 items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 dark:from-gray-900 dark:to-slate-800">
+      {/* Modern Header */}
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Filter className="w-5 h-5 text-white" />
-              <span className="text-white font-medium">Filtres:</span>
+              <div className="p-4 bg-gradient-to-br from-violet-600 to-purple-700 rounded-2xl shadow-lg">
+                <Brain className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{titleText.translatedText}</h1>
+                <p className="text-gray-600 dark:text-gray-400 font-medium">{subtitleText.translatedText}</p>
+              </div>
             </div>
             
-            <div className="flex flex-wrap gap-3">
-              {/* Filtre temporel */}
-              <select
-                value={selectedTimeframe}
-                onChange={(e) => setSelectedTimeframe(e.target.value as any)}
-                className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg border border-white border-opacity-30 backdrop-blur-lg"
-              >
-                <option value="24h">24 heures</option>
-                <option value="7d">7 jours</option>
-                <option value="30d">30 jours</option>
-              </select>
-
-              {/* Filtre catégorie */}
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg border border-white border-opacity-30 backdrop-blur-lg"
-              >
-                <option value="all">Toutes catégories</option>
-                <option value="Politique">Politique</option>
-                <option value="Économie">Économie</option>
-                <option value="Sport">Sport</option>
-                <option value="International">International</option>
-                <option value="Culture">Culture</option>
-              </select>
-
-              {/* Filtre sentiment */}
-              <select
-                value={selectedSentiment}
-                onChange={(e) => setSelectedSentiment(e.target.value as any)}
-                className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg border border-white border-opacity-30 backdrop-blur-lg"
-              >
-                <option value="all">Tous sentiments</option>
-                <option value="positive">😊 Positif</option>
-                <option value="neutral">😐 Neutre</option>
-                <option value="negative">😔 Négatif</option>
-              </select>
-            </div>
+            {/* Stats Overview */}
+            {data && (
+              <div className="hidden lg:flex items-center space-x-8">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {data.sentimentAnalysis.overall.positive || 0}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">{positiveText.translatedText}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+                    {data.sentimentAnalysis.overall.neutral || 0}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">{neutralText.translatedText}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    {data.sentimentAnalysis.overall.negative || 0}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">{negativeText.translatedText}</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Contenu principal */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* Time Filter Pills */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-2 px-4 py-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-700">
+            <Filter className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Période</span>
+          </div>
           
-          {/* Graphiques principaux */}
-          <div className="lg:col-span-2 space-y-8">
-            
-            {/* Graphique des tendances */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20"
+          {(['24h', '7d', '30d'] as const).map((timeframe) => (
+            <button
+              key={timeframe}
+              onClick={() => setSelectedTimeframe(timeframe)}
+              className={`px-6 py-2 rounded-xl font-medium transition-all duration-200 ${
+                selectedTimeframe === timeframe
+                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/25'
+                  : 'bg-white/60 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
+              }`}
             >
-              <div className="flex items-center mb-6">
-                <TrendingUp className="w-6 h-6 text-blue-400 mr-3" />
-                <h2 className="text-2xl font-bold text-white">Évolution des Sentiments</h2>
-              </div>
-              <SentimentChart data={data.sentimentAnalysis.trends?.map(trend => ({
-                ...trend,
-                total: trend.positive + trend.negative + trend.neutral,
-                sentimentScore: trend.positive + trend.negative + trend.neutral === 0 ? 0 : 
-                  (trend.positive - trend.negative) / (trend.positive + trend.negative + trend.neutral),
-                dominantSentiment: trend.positive > trend.negative && trend.positive > trend.neutral ? 'positive' as const :
-                  trend.negative > trend.neutral ? 'negative' as const : 'neutral' as const
-              })) || []} />
-            </motion.div>
-
-            {/* Répartition par catégories */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20"
-            >
-              <div className="flex items-center mb-6">
-                <BarChart3 className="w-6 h-6 text-green-400 mr-3" />
-                <h2 className="text-2xl font-bold text-white">Sentiments par Catégorie</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {data.categoryBreakdown?.map((category, index) => (
-                  <motion.div
-                    key={category.category}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 * index }}
-                    className="bg-white bg-opacity-5 rounded-xl p-4 border border-white border-opacity-10"
-                  >
-                    <div className="flex justify-between items-center mb-3">
-                      <h3 className="font-semibold text-white">{category.category}</h3>
-                      <span className="text-2xl">{getSentimentIcon(category.dominantSentiment)}</span>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-green-300">Positif</span>
-                        <span className="text-green-300">{category.positive}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-300">Neutre</span>
-                        <span className="text-gray-300">{category.neutral}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-red-300">Négatif</span>
-                        <span className="text-red-300">{category.negative}</span>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Sidebar avec détails */}
-          <div className="space-y-6">
-            
-            {/* Top émotions */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20"
-            >
-              <div className="flex items-center mb-4">
-                <Sparkles className="w-5 h-5 text-yellow-400 mr-2" />
-                <h3 className="text-lg font-bold text-white">Émotions Dominantes</h3>
-              </div>
-              <div className="space-y-3">
-                {data.topEmotions?.slice(0, 6).map((emotion, index) => (
-                  <motion.div
-                    key={emotion.emotion}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 * index }}
-                    className="flex justify-between items-center p-3 bg-white bg-opacity-5 rounded-lg"
-                  >
-                    <div className="flex items-center">
-                      <span className="text-xl mr-2">{getSentimentIcon(emotion.sentiment)}</span>
-                      <span className="text-white font-medium">{emotion.emotion}</span>
-                    </div>
-                    <span className="text-sm text-gray-300">{emotion.count}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Statistiques en temps réel */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20"
-            >
-              <div className="flex items-center mb-4">
-                <Zap className="w-5 h-5 text-purple-400 mr-2" />
-                <h3 className="text-lg font-bold text-white">En Temps Réel</h3>
-              </div>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Articles analysés</span>
-                  <span className="text-white font-bold">{data.articles?.length || 0}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Dernière mise à jour</span>
-                  <span className="text-white text-sm">
-                    {data.sentimentAnalysis.lastUpdated ? 
-                      new Date(data.sentimentAnalysis.lastUpdated).toLocaleTimeString('fr-FR') 
-                      : 'Maintenant'
-                    }
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Régions couvertes</span>
-                  <span className="text-white font-bold">{data.sentimentAnalysis.regional?.length || 0}</span>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Analyse régionale mini */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-              className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20"
-            >
-              <div className="flex items-center mb-4">
-                <MapPin className="w-5 h-5 text-blue-400 mr-2" />
-                <h3 className="text-lg font-bold text-white">Régions</h3>
-              </div>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {data.sentimentAnalysis.regional?.slice(0, 5).map((region, index) => (
-                  <motion.div
-                    key={region.region}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 * index }}
-                    className="flex justify-between items-center p-2 bg-white bg-opacity-5 rounded-lg text-sm"
-                  >
-                    <span className="text-white">{region.region}</span>
-                    <div className="flex items-center">
-                      <span className="text-xs mr-2">{getSentimentIcon(region.dominantSentiment)}</span>
-                      <span className="text-gray-300">{region.totalArticles}</span>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
+              {timeframe === '24h' ? hours24Text.translatedText : 
+               timeframe === '7d' ? days7Text.translatedText : 
+               days30Text.translatedText}
+            </button>
+          ))}
         </div>
 
-        {/* Articles récents avec sentiment */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="mt-12 bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20"
-        >
-          <div className="flex items-center mb-6">
-            <Eye className="w-6 h-6 text-indigo-400 mr-3" />
-            <h2 className="text-2xl font-bold text-white">Articles Récents Analysés</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data.articles?.slice(0, 6).map((article, index) => {
-              // Simuler un sentiment pour la démo
-              const sentiment = ['positive', 'negative', 'neutral'][Math.floor(Math.random() * 3)] as 'positive' | 'negative' | 'neutral';
-              return (
-                <motion.div
-                  key={article.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * index }}
-                  className={`p-4 rounded-xl border ${getSentimentColor(sentiment, 'low')} bg-opacity-20 hover:bg-opacity-30 transition-all cursor-pointer`}
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="text-xs px-2 py-1 rounded-full bg-black bg-opacity-30 text-white">
-                      {article.category}
-                    </span>
-                    <span className="text-xl">{getSentimentIcon(sentiment)}</span>
+        {data && (
+          <>
+            {/* Sentiment Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                    <TrendingUp className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <h4 className="text-white font-medium text-sm mb-2 line-clamp-2">
-                    {article.title}
-                  </h4>
-                  <div className="flex justify-between items-center text-xs text-gray-300">
-                    <span>{article.source}</span>
-                    <span>{new Date(article.publishDate).toLocaleDateString('fr-FR')}</span>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                      {data.sentimentAnalysis.overall.positive || 0}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">articles</div>
                   </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
-      </div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Sentiment {positiveText.translatedText}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Articles avec une tonalité positive</p>
+              </div>
+
+              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-xl">
+                    <BarChart3 className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
+                      {data.sentimentAnalysis.overall.neutral || 0}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">articles</div>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Sentiment {neutralText.translatedText}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Articles avec une tonalité neutre</p>
+              </div>
+
+              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
+                    <Activity className="w-6 h-6 text-red-600 dark:text-red-400" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-red-600 dark:text-red-400">
+                      {data.sentimentAnalysis.overall.negative || 0}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">articles</div>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Sentiment {negativeText.translatedText}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Articles avec une tonalité négative</p>
+              </div>
+            </div>
+
+            {/* Categories Analysis */}
+            {data.categoryBreakdown && data.categoryBreakdown.length > 0 && (
+              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 dark:border-gray-700 mb-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-violet-100 dark:bg-violet-900/30 rounded-xl">
+                    <Layers className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analyse par Catégorie</h2>
+                    <p className="text-gray-600 dark:text-gray-400">Répartition des sentiments par thématique</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  {data.categoryBreakdown.slice(0, 6).map((category, index) => {
+                    const total = category.positive + category.negative + category.neutral;
+                    const positivePercent = total > 0 ? (category.positive / total * 100) : 0;
+                    const negativePercent = total > 0 ? (category.negative / total * 100) : 0;
+                    const neutralPercent = total > 0 ? (category.neutral / total * 100) : 0;
+                    
+                    return (
+                      <div key={category.category} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                        <div className="flex justify-between items-center mb-3">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{getSentimentIcon(category.dominantSentiment)}</span>
+                            <div>
+                              <h3 className="font-semibold text-gray-900 dark:text-white">{category.category}</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">{total} articles analysés</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm">
+                            <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                              {category.positive} pos
+                            </span>
+                            <span className="text-gray-600 dark:text-gray-400 font-medium">
+                              {category.neutral} neu
+                            </span>
+                            <span className="text-red-600 dark:text-red-400 font-medium">
+                              {category.negative} nég
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Progress bars */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
+                              <div 
+                                className="bg-emerald-500 h-2.5 rounded-full transition-all duration-1000" 
+                                style={{ width: `${positivePercent}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-gray-600 dark:text-gray-400 w-10">{Math.round(positivePercent)}%</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
+                              <div 
+                                className="bg-gray-500 h-2.5 rounded-full transition-all duration-1000" 
+                                style={{ width: `${neutralPercent}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-gray-600 dark:text-gray-400 w-10">{Math.round(neutralPercent)}%</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
+                              <div 
+                                className="bg-red-500 h-2.5 rounded-full transition-all duration-1000" 
+                                style={{ width: `${negativePercent}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-gray-600 dark:text-gray-400 w-10">{Math.round(negativePercent)}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Top Emotions */}
+            {data.topEmotions && data.topEmotions.length > 0 && (
+              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 dark:border-gray-700 mb-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
+                    <Sparkles className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Émotions Dominantes</h2>
+                    <p className="text-gray-600 dark:text-gray-400">Tendances émotionnelles principales</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {data.topEmotions.slice(0, 8).map((emotion, index) => (
+                    <div key={emotion.emotion} className={`p-4 rounded-xl border-2 hover:shadow-md transition-all duration-200 ${getSentimentColor(emotion.sentiment)} border-opacity-20`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-2xl">{getSentimentIcon(emotion.sentiment)}</span>
+                        <span className="text-xl font-bold">{emotion.count}</span>
+                      </div>
+                      <h4 className="font-semibold mb-1">{emotion.emotion}</h4>
+                      <p className="text-sm opacity-80 capitalize">{emotion.sentiment}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recent Articles */}
+            {data.articles && data.articles.length > 0 && (
+              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                      <Eye className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{articlesText.translatedText} Analysés</h2>
+                      <p className="text-gray-600 dark:text-gray-400">Sentiment détecté en temps réel</p>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    {data.articles.length} articles analysés
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {data.articles.slice(0, 6).map((article, index) => {
+                    // Simulate sentiment analysis result
+                    const sentiments = ['positive', 'negative', 'neutral'] as const;
+                    const sentiment = sentiments[Math.floor(Math.random() * 3)];
+                    
+                    return (
+                      <div key={article.id} className={`rounded-xl p-6 border-2 hover:shadow-lg transition-all duration-300 cursor-pointer group ${getSentimentColor(sentiment)} border-opacity-20`}>
+                        {/* Sentiment indicator */}
+                        <div className="flex justify-between items-start mb-4">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-sm">
+                            {article.category}
+                          </span>
+                          <span className="text-2xl group-hover:scale-110 transition-transform">
+                            {getSentimentIcon(sentiment)}
+                          </span>
+                        </div>
+                        
+                        {/* Article title */}
+                        <h4 className="font-bold text-base mb-3 line-clamp-3 leading-relaxed group-hover:opacity-90 transition-opacity">
+                          {article.title}
+                        </h4>
+                        
+                        {/* Article meta */}
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="font-medium opacity-80">{article.source}</span>
+                          <span className="opacity-70">
+                            {new Date(article.publishDate).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'short'
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </main>
     </div>
   );
 }
