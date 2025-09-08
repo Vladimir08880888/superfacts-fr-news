@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 interface GoogleAdSenseProps {
@@ -11,11 +11,12 @@ interface GoogleAdSenseProps {
   className?: string;
   responsive?: boolean;
   format?: 'auto' | 'rectangle' | 'vertical' | 'horizontal';
+  style?: React.CSSProperties;
 }
 
 declare global {
   interface Window {
-    adsbygoogle: any[];
+    adsbygoogle: Record<string, unknown>[];
   }
 }
 
@@ -26,33 +27,101 @@ export default function GoogleAdSense({
   height = 90,
   className = '',
   responsive = true,
-  format = 'auto'
+  format = 'auto',
+  style = {}
 }: GoogleAdSenseProps) {
   const adRef = useRef<HTMLDivElement>(null);
+  const [, setAdLoaded] = useState(false);
+  const [adError, setAdError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      // Only proceed if AdSense client ID is available
-      if (!adClient) {
-        console.warn('AdSense client ID not found. Set NEXT_PUBLIC_ADSENSE_CLIENT_ID in your environment variables.');
-        return;
+    const loadAd = () => {
+      try {
+        // Only proceed if AdSense client ID and slot are available
+        if (!adClient) {
+          setAdError('AdSense client ID not configured');
+          return;
+        }
+
+        if (!adSlot || adSlot === '1234567890' || adSlot === '5555555555' || adSlot === '9876543210') {
+          setAdError('Valid ad slot ID required');
+          return;
+        }
+
+        // Wait for the ad element to be in the DOM
+        if (!adRef.current) {
+          setAdError('Ad container not ready');
+          return;
+        }
+
+        // Check if the ad container has proper dimensions
+        const rect = adRef.current.getBoundingClientRect();
+        if (rect.width < 10) {
+          console.warn('AdSense container width too small:', rect.width);
+        }
+
+        // Initialize adsbygoogle array if it doesn't exist
+        if (!window.adsbygoogle) {
+          window.adsbygoogle = [];
+        }
+
+        // Check if the ad was already loaded
+        const insElement = adRef.current.querySelector('ins.adsbygoogle');
+        if (insElement && insElement.getAttribute('data-adsbygoogle-status')) {
+          return; // Ad already loaded
+        }
+
+        // Push ad to the queue
+        window.adsbygoogle.push({});
+        setAdLoaded(true);
+        setAdError(null);
+      } catch (error) {
+        console.error('AdSense error:', error);
+        setAdError(error instanceof Error ? error.message : 'Ad loading failed');
       }
+    };
 
-      // Initialize adsbygoogle array if it doesn't exist
-      if (!window.adsbygoogle) {
-        window.adsbygoogle = [];
+    // Wait a bit for the DOM to be fully ready
+    const timeoutId = setTimeout(loadAd, 100);
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
+    };
+  }, [adClient, adSlot]);
 
-      // Push ad to the queue
-      window.adsbygoogle.push({});
-    } catch (error) {
-      console.error('AdSense error:', error);
-    }
-  }, [adClient]);
+  const adStyle = {
+    ...style,
+    ...(responsive 
+      ? { display: 'block', width: '100%', minHeight: `${height}px` }
+      : { display: 'inline-block', width: `${width}px`, height: `${height}px` })
+  };
 
-  const adStyle = responsive 
-    ? { display: 'block', width: '100%' }
-    : { display: 'inline-block', width: `${width}px`, height: `${height}px` };
+  // Show error state for development
+  if (adError && process.env.NODE_ENV === 'development') {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className={`google-adsense-container ${className} border-2 border-dashed border-gray-300 bg-gray-50 dark:bg-gray-800 dark:border-gray-600`}
+      >
+        <div className="text-xs text-gray-500 text-center mb-1">
+          AdSense (Dev Mode)
+        </div>
+        <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          <div>⚠️ {adError}</div>
+          <div className="mt-1 text-xs">Slot: {adSlot}</div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Don't render if no client ID in production
+  if (!adClient) {
+    return null;
+  }
 
   return (
     <motion.div
@@ -66,7 +135,7 @@ export default function GoogleAdSense({
         Publicité
       </div>
 
-      <div ref={adRef} className="adsense-wrapper">
+      <div ref={adRef} className="adsense-wrapper" style={{ minHeight: responsive ? `${height}px` : undefined }}>
         <ins
           className="adsbygoogle"
           style={adStyle}
@@ -124,8 +193,8 @@ export function AdSenseMobile({ adClient, adSlot }: { adClient?: string; adSlot:
 }
 
 // Higher-order component for easy AdSense integration
-export function withAdSense(Component: React.ComponentType<any>) {
-  return function AdSenseWrappedComponent(props: any) {
+export function withAdSense(Component: React.ComponentType<Record<string, unknown>>) {
+  return function AdSenseWrappedComponent(props: Record<string, unknown>) {
     return (
       <>
         <Component {...props} />

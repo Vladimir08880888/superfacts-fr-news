@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Analytics } from '@vercel/analytics/next';
 import { TranslationProvider } from '@/contexts/TranslationContext';
 import { BookmarksProvider } from '@/contexts/BookmarksContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -232,6 +233,7 @@ export default function RootLayout({
                   {children}
                   <Footer />
                   <MobileStickyAd />
+                  <Analytics mode="production" />
                 </RecommendationsProvider>
               </BookmarksProvider>
             </TranslationProvider>

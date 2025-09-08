@@ -83,7 +83,7 @@ export default function AdPreferences({ isOpen, onClose }: AdPreferencesProps) {
                         Bloqueur de publicité détecté
                       </h3>
                       <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                        Nous respectons votre choix d'utiliser un bloqueur de publicité.
+                        Nous respectons votre choix d&apos;utiliser un bloqueur de publicité.
                       </p>
                     </div>
                   </div>

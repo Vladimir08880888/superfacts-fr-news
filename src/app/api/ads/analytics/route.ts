@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adManager } from '@/lib/ad-manager';
+import { Advertisement, AdPerformance, AdStatus } from '@/types/advertising';
+import { PerformanceData, SummaryAnalytics, DetailedAnalytics, RevenueAnalytics, TopPerformingAd, RevenueByDay } from '@/types/ads';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,7 +22,7 @@ export async function GET(request: NextRequest) {
       endDate = new Date(endDateParam);
     }
 
-    // Get performance data
+    // Get performance data  
     const performanceData = adManager.getPerformance(adId || undefined, startDate, endDate);
     
     // Get ads data for context
@@ -62,14 +64,14 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function generateSummaryAnalytics(performanceData: any[], ads: any[]) {
+function generateSummaryAnalytics(performanceData: AdPerformance[], ads: Advertisement[]): SummaryAnalytics {
   const totalImpressions = performanceData.reduce((sum, p) => sum + p.impressions, 0);
   const totalClicks = performanceData.reduce((sum, p) => sum + p.clicks, 0);
   const totalRevenue = performanceData.reduce((sum, p) => sum + p.revenue, 0);
   const avgCTR = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
 
   // Active campaigns
-  const activeCampaigns = ads.filter(ad => ad.status === 'active').length;
+  const activeCampaigns = ads.filter(ad => ad.status === AdStatus.ACTIVE).length;
   const totalBudget = ads.reduce((sum, ad) => sum + ad.campaign.budget, 0);
   const spentBudget = ads.reduce((sum, ad) => sum + ad.campaign.spentAmount, 0);
 
@@ -94,7 +96,7 @@ function generateSummaryAnalytics(performanceData: any[], ads: any[]) {
   };
 }
 
-function generateDetailedAnalytics(performanceData: any[], ads: any[]) {
+function generateDetailedAnalytics(performanceData: AdPerformance[], ads: Advertisement[]): DetailedAnalytics {
   return {
     performanceByAd: performanceData.map(p => {
       const ad = ads.find(a => a.id === p.adId);
@@ -113,7 +115,7 @@ function generateDetailedAnalytics(performanceData: any[], ads: any[]) {
   };
 }
 
-function generateRevenueAnalytics(performanceData: any[], ads: any[]) {
+function generateRevenueAnalytics(performanceData: AdPerformance[], ads: Advertisement[]): RevenueAnalytics {
   const totalRevenue = performanceData.reduce((sum, p) => sum + p.revenue, 0);
   const revenueByModel = getRevenueByPricingModel(ads);
   const topEarningAds = performanceData
@@ -141,7 +143,7 @@ function generateRevenueAnalytics(performanceData: any[], ads: any[]) {
   };
 }
 
-function getTopPerformingAds(performanceData: any[], ads: any[], limit = 5) {
+function getTopPerformingAds(performanceData: AdPerformance[], ads: Advertisement[], limit = 5): TopPerformingAd[] {
   const adPerformance = new Map();
   
   performanceData.forEach(p => {
@@ -174,7 +176,7 @@ function getTopPerformingAds(performanceData: any[], ads: any[], limit = 5) {
     });
 }
 
-function getRevenueByDay(performanceData: any[]) {
+function getRevenueByDay(performanceData: AdPerformance[]): RevenueByDay[] {
   const revenueByDay = new Map();
   
   performanceData.forEach(p => {
@@ -190,7 +192,7 @@ function getRevenueByDay(performanceData: any[]) {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-function calculateGrowth(performanceData: any[], metric: string) {
+function calculateGrowth(performanceData: AdPerformance[], metric: 'impressions' | 'clicks' | 'revenue' | 'conversions' | 'ctr' | 'cpm' | 'cpc'): number {
   if (performanceData.length < 2) return 0;
   
   const sortedData = performanceData.sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -263,7 +265,7 @@ function getHourlyPerformance(performanceData: any[]) {
 
 function getDevicePerformance(ads: any[]) {
   // This would require device tracking in performance data
-  // For now, return targeting preferences
+  // For now, return targeting preferences as array
   const deviceTargeting = { mobile: 0, desktop: 0, tablet: 0 };
   
   ads.forEach(ad => {
@@ -274,7 +276,11 @@ function getDevicePerformance(ads: any[]) {
     });
   });
 
-  return deviceTargeting;
+  return Object.entries(deviceTargeting).map(([device, count]) => ({
+    device,
+    targetingCount: count,
+    percentage: ads.length > 0 ? (count / ads.length) * 100 : 0
+  }));
 }
 
 function getRevenueByPricingModel(ads: any[]) {

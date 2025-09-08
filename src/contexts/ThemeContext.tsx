@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { debugTheme } from '@/lib/theme-utils';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -20,8 +21,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('superfacts-theme') as Theme;
-      if (savedTheme) {
+      if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
         setThemeState(savedTheme);
+      } else {
+        // Set default theme based on system preference if no saved theme
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        setThemeState('system');
+        setEffectiveTheme(systemTheme);
       }
     }
   }, []);
@@ -52,10 +58,49 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const root = window.document.documentElement;
+      const body = window.document.body;
+      
+      // Remove all theme classes
       root.classList.remove('light', 'dark');
+      body.classList.remove('light', 'dark');
+      
+      // Add current theme class
       root.classList.add(effectiveTheme);
+      body.classList.add(effectiveTheme);
+      
+      // Update color scheme meta tag for better browser integration
+      let colorScheme = document.querySelector('meta[name="color-scheme"]');
+      if (!colorScheme) {
+        colorScheme = document.createElement('meta');
+        colorScheme.setAttribute('name', 'color-scheme');
+        document.head.appendChild(colorScheme);
+      }
+      colorScheme.setAttribute('content', effectiveTheme === 'dark' ? 'dark light' : 'light dark');
+      
+      // Debug theme changes in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🎨 Theme applied:', effectiveTheme);
+        setTimeout(() => debugTheme(), 100);
+      }
     }
   }, [effectiveTheme]);
+
+  // Listen for custom theme change events
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleCustomThemeChange = (event: CustomEvent) => {
+      const newTheme = event.detail as Theme;
+      if (['light', 'dark', 'system'].includes(newTheme)) {
+        setThemeState(newTheme);
+      }
+    };
+
+    window.addEventListener('themeChange', handleCustomThemeChange as EventListener);
+    return () => {
+      window.removeEventListener('themeChange', handleCustomThemeChange as EventListener);
+    };
+  }, []);
 
   // Save theme to localStorage
   const setTheme = (newTheme: Theme) => {

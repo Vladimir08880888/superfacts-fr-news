@@ -1,7 +1,8 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "installCommand": "npm install",
+  "installCommand": "npm install --frozen-lockfile",
   "framework": "nextjs",
   "rewrites": [
     {
@@ -27,7 +28,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "*"
+          "value": "https://superfacts.fr"
         },
         {
           "key": "Access-Control-Allow-Methods",
@@ -35,7 +36,11 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
+          "value": "Content-Type, Authorization, X-Requested-With"
+        },
+        {
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
         }
       ]
     },
@@ -52,35 +57,79 @@
         },
         {
           "key": "Referrer-Policy",
-          "value": "origin-when-cross-origin"
+          "value": "strict-origin-when-cross-origin"
         },
         {
           "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
+          "value": "camera=(), microphone=(), geolocation=(), payment=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-DNS-Prefetch-Control",
+          "value": "on"
+        }
+      ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/favicon.ico",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
         }
       ]
     }
   ],
   "functions": {
-    "src/app/api/**/*.ts": {
-      "maxDuration": 30
-    },
     "src/app/api/collect/route.ts": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "memory": 512
     },
     "src/app/api/translate/route.ts": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "memory": 256
+    },
+    "src/app/api/fact-check/route.ts": {
+      "maxDuration": 30,
+      "memory": 256
+    },
+    "src/app/api/sentiment-analysis/route.ts": {
+      "maxDuration": 20,
+      "memory": 256
+    },
+    "src/app/api/recommendations/route.ts": {
+      "maxDuration": 15,
+      "memory": 256
+    },
+    "src/app/api/**/route.ts": {
+      "maxDuration": 15,
+      "memory": 256
     }
   },
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "VERCEL": "1"
   },
   "regions": ["cdg1"],
   "outputDirectory": ".next",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "crons": [
     {
       "path": "/api/collect",
-      "schedule": "0 */3 * * *"
+      "schedule": "0 6,12,18 * * *"
     }
   ]
 }

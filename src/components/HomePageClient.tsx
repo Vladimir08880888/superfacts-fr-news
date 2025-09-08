@@ -200,7 +200,7 @@ function HomeContent() {
   const hotArticles = articles.filter(article => article.isHot).slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Header
         onSearch={setSearchQuery}
         onCategoryFilter={setSelectedCategory}
@@ -278,7 +278,7 @@ function HomeContent() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.6 }}
-        className="bg-gray-50 py-4"
+        className="bg-gray-50 dark:bg-gray-800/50 py-4"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center">
@@ -293,7 +293,7 @@ function HomeContent() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9, duration: 0.8 }}
-          className="relative bg-gradient-to-br from-white/80 to-gray-50/80 backdrop-blur-sm py-12"
+          className="relative bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-900/80 backdrop-blur-sm py-12"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-center">
@@ -316,7 +316,7 @@ function HomeContent() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700"
+              className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3 text-red-700 dark:text-red-300"
             >
               <AlertCircle className="w-5 h-5" />
               <span>{error}</span>
@@ -339,7 +339,7 @@ function HomeContent() {
               className="text-center"
             >
               <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-4" />
-              <p className="text-gray-600">{translatedLoadingNews}</p>
+              <p className="text-gray-600 dark:text-gray-300">{translatedLoadingNews}</p>
             </motion.div>
           </div>
         ) : (
@@ -356,7 +356,7 @@ function HomeContent() {
                   <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-white" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {translatedTopStories}
                   </h2>
                 </motion.div>
@@ -399,10 +399,10 @@ function HomeContent() {
                   transition={{ delay: 0.4 }}
                   className="flex items-center justify-between mb-6"
                 >
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {selectedCategory ? selectedCategory : translatedAllNews}
                   </h2>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
                     {filteredArticles.length} {filteredArticles.length === 1 ? translatedArticle : translatedArticles}
                   </span>
                 </motion.div>
@@ -492,7 +492,7 @@ function HomeContent() {
                     <div className="text-gray-400 mb-4">
                       <Sparkles className="w-12 h-12 mx-auto" />
                     </div>
-                    <p className="text-gray-600">
+                    <p className="text-gray-600 dark:text-gray-300">
                       {searchQuery || selectedCategory 
                         ? translatedNoArticlesFound
                         : translatedNoArticlesAvailable
@@ -542,12 +542,12 @@ function HomeContent() {
                     transition={{ delay: 0.6 }}
                     className="mb-8"
                   >
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                       <div className="flex items-center gap-2 mb-4">
                         <div className="w-6 h-6 bg-red-500 rounded-lg flex items-center justify-center">
                           <TrendingUp className="w-4 h-4 text-white" />
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900">{translatedTrends}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{translatedTrends}</h3>
                       </div>
                       
                       <div className="space-y-3">
@@ -610,20 +610,20 @@ function HomeContent() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.8 }}
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6"
+                  className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-700 rounded-xl p-6"
                 >
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{translatedStatistics}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{translatedStatistics}</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">{translatedTotalArticles}</span>
+                      <span className="text-gray-600 dark:text-gray-300">{translatedTotalArticles}</span>
                       <span className="font-semibold text-blue-600">{articles.length}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">{translatedHotArticles}</span>
+                      <span className="text-gray-600 dark:text-gray-300">{translatedHotArticles}</span>
                       <span className="font-semibold text-red-600">{hotArticles.length}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">{translatedActiveSources}</span>
+                      <span className="text-gray-600 dark:text-gray-300">{translatedActiveSources}</span>
                       <span className="font-semibold text-green-600">
                         {new Set(articles.map(a => a.source)).size}
                       </span>
@@ -642,10 +642,10 @@ function HomeContent() {
 export default function HomePageClient() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-4" />
-          <p className="text-gray-600">Chargement...</p>
+          <p className="text-gray-600 dark:text-gray-300">Chargement...</p>
         </div>
       </div>
     }>

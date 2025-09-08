@@ -1,9 +1,7 @@
 import Parser from 'rss-parser';
 import * as cheerio from 'cheerio';
 import axios from 'axios';
-import { writeFile, readFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
+import { databaseManager } from './database-adapter';
 
 export interface Article {
   id: string;
@@ -36,7 +34,6 @@ export interface NewsSource {
 
 export class FrenchNewsCollector {
   private parser: Parser;
-  private articlesDir: string;
   
   // Sources d'actualités françaises vérifiées et fonctionnelles
   private sources: NewsSource[] = [
@@ -108,14 +105,6 @@ export class FrenchNewsCollector {
         'User-Agent': 'SuperFacts.fr RSS Reader 1.0 (https://superfacts.fr)'
       }
     });
-    this.articlesDir = path.join(process.cwd(), 'data');
-    this.ensureDataDir();
-  }
-
-  private async ensureDataDir() {
-    if (!existsSync(this.articlesDir)) {
-      await mkdir(this.articlesDir, { recursive: true });
-    }
   }
 
   private cleanText(text: string): string {
@@ -838,13 +827,12 @@ export class FrenchNewsCollector {
     let successCount = 0;
     let failCount = 0;
 
-    // Charge les articles existants
+    // Charge les articles existants depuis la base de données
     let existingArticles: Article[] = [];
     try {
-      const existingData = await readFile(path.join(this.articlesDir, 'articles.json'), 'utf8');
-      existingArticles = JSON.parse(existingData);
+      existingArticles = await databaseManager.getArticles();
     } catch (error) {
-      console.log('📝 Création d\'un nouveau fichier d\'articles...');
+      console.log('📝 Création d\'une nouvelle base de données d\'articles...');
     }
 
     // Collecte depuis chaque source avec gestion d'erreur améliorée
@@ -907,12 +895,8 @@ export class FrenchNewsCollector {
     // Combine avec les articles existants (limite à 1000 articles)
     const updatedArticles = [...allArticles, ...existingArticles].slice(0, 1000);
     
-    // Sauvegarde
-    await writeFile(
-      path.join(this.articlesDir, 'articles.json'),
-      JSON.stringify(updatedArticles, null, 2),
-      'utf8'
-    );
+    // Sauvegarde dans la base de données
+    await databaseManager.saveArticles(updatedArticles);
 
     // Rapport final
     console.log(`\n📊 SUMMARY:`);
@@ -932,9 +916,9 @@ export class FrenchNewsCollector {
 
   public async getArticles(): Promise<Article[]> {
     try {
-      const data = await readFile(path.join(this.articlesDir, 'articles.json'), 'utf8');
-      return JSON.parse(data);
+      return await databaseManager.getArticles();
     } catch (error) {
+      console.error('Erreur lors de la récupération des articles:', error);
       return [];
     }
   }

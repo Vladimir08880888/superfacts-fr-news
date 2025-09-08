@@ -71,7 +71,7 @@ export default function ArticlePage() {
           className="text-center"
         >
           <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-4" />
-          <p className="text-gray-600">Chargement de l'article...</p>
+          <p className="text-gray-600">Chargement de l&apos;article...</p>
         </motion.div>
       </div>
     );
@@ -93,7 +93,7 @@ export default function ArticlePage() {
             className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour à l'accueil
+            Retour à l&apos;accueil
           </button>
         </motion.div>
       </div>

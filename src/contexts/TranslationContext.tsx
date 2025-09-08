@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import KVService from '@/lib/kv';
 
 export interface Language {
   code: string;
@@ -26,6 +27,8 @@ export interface TranslationContextType {
   isTranslating: boolean;
   translationCache: TranslationCache;
   clearCache: () => void;
+  useKVCache: boolean;
+  setUseKVCache: (enabled: boolean) => void;
 }
 
 const SUPPORTED_LANGUAGES: Language[] = [
@@ -51,12 +54,28 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
   const [currentLanguage, setCurrentLanguageState] = useState<Language>(SUPPORTED_LANGUAGES[0]); // Default to French
   const [translationCache, setTranslationCache] = useState<TranslationCache>({});
   const [isTranslating, setIsTranslating] = useState(false);
+  const [useKVCache, setUseKVCacheState] = useState(true); // Default to using KV cache
+  const [kvAvailable, setKvAvailable] = useState(false);
 
-  // Load saved language and cache from localStorage
+  // Check KV availability and load saved settings
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // Check KV availability
+      KVService.healthCheck()
+        .then(isHealthy => {
+          setKvAvailable(isHealthy);
+          if (!isHealthy) {
+            setUseKVCacheState(false);
+            console.warn('KV cache not available, falling back to localStorage');
+          }
+        })
+        .catch(() => {
+          setKvAvailable(false);
+          setUseKVCacheState(false);
+        });
+      
       const savedLang = localStorage.getItem('superfacts-language');
-      const savedCache = localStorage.getItem('superfacts-translation-cache');
+      const savedUseKV = localStorage.getItem('superfacts-use-kv-cache');
       
       if (savedLang) {
         const lang = SUPPORTED_LANGUAGES.find(l => l.code === savedLang);
@@ -65,35 +84,43 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
         }
       }
       
-      if (savedCache) {
-        try {
-          const cache = JSON.parse(savedCache);
-          // Clean expired cache entries
-          const cleanCache: TranslationCache = {};
-          const now = Date.now();
-          
-          Object.keys(cache).forEach(key => {
-            const langCache: any = {};
-            Object.keys(cache[key] || {}).forEach(targetLang => {
-              const entry = cache[key][targetLang];
-              if (entry && now - entry.timestamp < CACHE_DURATION) {
-                langCache[targetLang] = entry;
+      if (savedUseKV !== null) {
+        setUseKVCacheState(savedUseKV === 'true');
+      }
+      
+      // Load localStorage cache if not using KV
+      if (savedUseKV === 'false' || !kvAvailable) {
+        const savedCache = localStorage.getItem('superfacts-translation-cache');
+        if (savedCache) {
+          try {
+            const cache = JSON.parse(savedCache);
+            // Clean expired cache entries
+            const cleanCache: TranslationCache = {};
+            const now = Date.now();
+            
+            Object.keys(cache).forEach(key => {
+              const langCache: any = {};
+              Object.keys(cache[key] || {}).forEach(targetLang => {
+                const entry = cache[key][targetLang];
+                if (entry && now - entry.timestamp < CACHE_DURATION) {
+                  langCache[targetLang] = entry;
+                }
+              });
+              if (Object.keys(langCache).length > 0) {
+                cleanCache[key] = langCache;
               }
             });
-            if (Object.keys(langCache).length > 0) {
-              cleanCache[key] = langCache;
-            }
-          });
-          
-          setTranslationCache(cleanCache);
-        } catch (error) {
-          console.error('Failed to load translation cache:', error);
+            
+            setTranslationCache(cleanCache);
+          } catch (error) {
+            console.error('Failed to load translation cache:', error);
+          }
         }
       }
     }
-  }, []);
+  }, [kvAvailable]);
 
-  // Save language and cache to localStorage
+  // Save language and cache settings
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('superfacts-language', currentLanguage.code);
@@ -102,12 +129,72 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      localStorage.setItem('superfacts-use-kv-cache', useKVCache.toString());
+    }
+  }, [useKVCache]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !useKVCache) {
       localStorage.setItem('superfacts-translation-cache', JSON.stringify(translationCache));
     }
-  }, [translationCache]);
+  }, [translationCache, useKVCache]);
 
   const setCurrentLanguage = (language: Language) => {
     setCurrentLanguageState(language);
+  };
+
+  const setUseKVCache = (enabled: boolean) => {
+    if (enabled && !kvAvailable) {
+      console.warn('Cannot enable KV cache: KV service is not available');
+      return;
+    }
+    setUseKVCacheState(enabled);
+  };
+
+  // Helper function to get cached translation
+  const getCachedTranslation = async (text: string, targetLang: string): Promise<string | null> => {
+    if (useKVCache && kvAvailable) {
+      try {
+        return await KVService.getTranslation(text, targetLang);
+      } catch (error) {
+        console.warn('KV cache read error:', error);
+      }
+    }
+    
+    // Fallback to local cache
+    const cacheKey = text.trim().toLowerCase().substring(0, 100);
+    const cached = translationCache[cacheKey]?.[targetLang];
+    
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      return cached.text;
+    }
+    
+    return null;
+  };
+
+  // Helper function to set cached translation
+  const setCachedTranslation = async (text: string, targetLang: string, translation: string) => {
+    if (useKVCache && kvAvailable) {
+      try {
+        await KVService.setTranslation(text, targetLang, translation);
+        return;
+      } catch (error) {
+        console.warn('KV cache write error:', error);
+      }
+    }
+    
+    // Fallback to local cache
+    const cacheKey = text.trim().toLowerCase().substring(0, 100);
+    setTranslationCache(prev => ({
+      ...prev,
+      [cacheKey]: {
+        ...prev[cacheKey],
+        [targetLang]: {
+          text: translation,
+          timestamp: Date.now(),
+        },
+      },
+    }));
   };
 
   const translateText = async (text: string, targetLang?: string): Promise<string> => {
@@ -123,12 +210,10 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
       return text;
     }
 
-    // Check cache first
-    const cacheKey = text.trim().toLowerCase().substring(0, 100); // Use first 100 chars as key
-    const cached = translationCache[cacheKey]?.[target];
-    
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      return cached.text;
+    // Check cache first using the new caching system
+    const cachedTranslation = await getCachedTranslation(text, target);
+    if (cachedTranslation) {
+      return cachedTranslation;
     }
 
     setIsTranslating(true);
@@ -159,17 +244,8 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
       const result = await response.json();
       const translatedText = result.translatedText || text;
 
-      // Update cache
-      setTranslationCache(prev => ({
-        ...prev,
-        [cacheKey]: {
-          ...prev[cacheKey],
-          [target]: {
-            text: translatedText,
-            timestamp: Date.now(),
-          },
-        },
-      }));
+      // Update cache using the new caching system
+      await setCachedTranslation(text, target, translatedText);
 
       return translatedText;
     } catch (error) {
@@ -187,7 +263,15 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const clearCache = () => {
+  const clearCache = async () => {
+    if (useKVCache && kvAvailable) {
+      try {
+        await KVService.clearTranslationCache();
+      } catch (error) {
+        console.warn('Failed to clear KV cache:', error);
+      }
+    }
+    
     setTranslationCache({});
     if (typeof window !== 'undefined') {
       localStorage.removeItem('superfacts-translation-cache');
@@ -204,6 +288,8 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
         isTranslating,
         translationCache,
         clearCache,
+        useKVCache: useKVCache && kvAvailable,
+        setUseKVCache,
       }}
     >
       {children}

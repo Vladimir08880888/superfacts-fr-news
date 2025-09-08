@@ -188,7 +188,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
         animate="visible"
         transition={transitionProps}
         whileHover={{ y: -4, transition: { duration: 0.2 } }}
-        className="group bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden"
+        className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg dark:hover:shadow-xl dark:hover:shadow-gray-900/20 transition-all duration-300 overflow-hidden"
       >
         <div className="p-4">
           <div className="flex items-start gap-3">
@@ -196,7 +196,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
               variants={imageVariants}
               whileHover="hover"
               whileTap="tap"
-              className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0"
+              className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0"
             >
               <Image
                 src={article.imageUrl}
@@ -217,12 +217,12 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
             <div className="flex-1 min-w-0">
               <Link 
                 href={`/articles/${article.id}`}
-                className="block hover:text-blue-600 transition-colors duration-200"
+                className="block hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
                 onClick={handleArticleClick}
               >
                 <div className="flex items-start gap-2">
                   <h3 className={cn(
-                    "text-sm font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300 flex-1",
+                    "text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 flex-1",
                     titleLoading && "animate-pulse"
                   )}>
                     {translatedTitle}
@@ -233,7 +233,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
                 </div>
               </Link>
               
-              <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+              <div className="flex items-center justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-blue-600">{translatedSource}</span>
                   <span>•</span>
@@ -248,7 +248,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={handlePDFDownload}
-                    className="p-1.5 rounded-full text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors duration-200"
+                    className="p-1.5 rounded-full text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200"
                     title="Télécharger en PDF"
                   >
                     <Download className="w-3.5 h-3.5" />
@@ -260,8 +260,8 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
                     className={cn(
                       "p-1.5 rounded-full transition-colors duration-200",
                       bookmarked 
-                        ? "text-yellow-500 bg-yellow-50 hover:bg-yellow-100" 
-                        : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50"
+                        ? "text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/30" 
+                        : "text-gray-400 dark:text-gray-500 hover:text-yellow-500 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                     )}
                     title={bookmarked ? "Retirer des favoris" : "Ajouter aux favoris"}
                   >
@@ -284,12 +284,12 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
         animate="visible"
         transition={transitionProps}
         whileHover={{ y: -8, transition: { duration: 0.3 } }}
-        className="group bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-500 overflow-hidden"
+        className="group bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-2xl dark:hover:shadow-gray-900/30 transition-all duration-500 overflow-hidden"
       >
         <motion.div 
           variants={imageVariants}
           whileHover="hover"
-          className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden"
+          className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 overflow-hidden"
         >
           <Image
             src={article.imageUrl}
@@ -377,14 +377,14 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
         
         <div className="p-6">
           <p className={cn(
-            "text-gray-600 line-clamp-3 mb-4",
+            "text-gray-600 dark:text-gray-300 line-clamp-3 mb-4",
             summaryLoading && "animate-pulse"
           )}>
             {translatedSummary}
           </p>
           
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-sm text-gray-500">
+            <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
               <div className="flex items-center gap-1">
                 <User className="w-4 h-4" />
                 <span className="font-medium text-blue-600">{translatedSource}</span>
@@ -413,7 +413,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handlePDFDownload}
-                className="inline-flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
                 title="Télécharger en PDF"
               >
                 <Download className="w-4 h-4" />
@@ -427,7 +427,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
               />
               <Link 
                 href={`/articles/${article.id}`}
-                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200"
                 onClick={handleArticleClick}
               >
                 <span className="text-sm font-medium">Lire l'article</span>
@@ -440,7 +440,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
               {article.tags.slice(0, 5).map((tag) => (
                 <span 
                   key={tag}
-                  className="px-3 py-1 bg-blue-50 text-blue-700 text-xs rounded-full hover:bg-blue-100 hover:text-blue-800 transition-colors duration-200 cursor-pointer border border-blue-200 font-medium"
+                  className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-800 dark:hover:text-blue-200 transition-colors duration-200 cursor-pointer border border-blue-200 dark:border-blue-700 font-medium"
                 >
                   #{tag}
                 </span>
@@ -460,12 +460,12 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
       animate="visible"
       transition={transitionProps}
       whileHover={{ y: -6, transition: { duration: 0.3 } }}
-      className="group bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-xl transition-all duration-400 overflow-hidden"
+      className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-xl dark:hover:shadow-gray-900/30 transition-all duration-400 overflow-hidden"
     >
       <motion.div 
         variants={imageVariants}
         whileHover="hover"
-        className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden"
+        className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 overflow-hidden"
       >
         <Image
           src={article.imageUrl}
@@ -525,7 +525,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
           <span className={cn('px-2 py-1 text-xs font-medium rounded-full border', getCategoryColor(article.category))}>
             {translatedCategory}
           </span>
-          <span className="text-xs text-gray-500">{formatDate(article.publishDate)}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(article.publishDate)}</span>
         </div>
         
         <Link 
@@ -535,7 +535,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
         >
           <div className="flex items-start gap-2">
             <h3 className={cn(
-              "text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300 flex-1",
+              "text-lg font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 flex-1",
               titleLoading && "animate-pulse"
             )}>
               {translatedTitle}
@@ -547,14 +547,14 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
         </Link>
         
         <p className={cn(
-          "text-gray-600 text-sm line-clamp-3 mb-4",
+          "text-gray-600 dark:text-gray-300 text-sm line-clamp-3 mb-4",
           summaryLoading && "animate-pulse"
         )}>
           {translatedSummary}
         </p>
         
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
             <span className="font-medium text-blue-600">{translatedSource}</span>
             {article.readTime && (
               <>
@@ -572,7 +572,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handlePDFDownload}
-              className="inline-flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors duration-200"
+              className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
               title="Télécharger en PDF"
             >
               <Download className="w-3.5 h-3.5" />
@@ -586,7 +586,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
             />
             <Link 
               href={`/articles/${article.id}`}
-              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors duration-200"
+              className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200"
               onClick={handleArticleClick}
             >
               <span className="text-sm">Lire</span>
@@ -599,7 +599,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
             {article.tags.slice(0, 4).map((tag) => (
               <span 
                 key={tag}
-                className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full hover:bg-blue-100 hover:text-blue-800 transition-colors duration-200 cursor-pointer border border-blue-200"
+                className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-800 dark:hover:text-blue-200 transition-colors duration-200 cursor-pointer border border-blue-200 dark:border-blue-700"
               >
                 #{tag}
               </span>

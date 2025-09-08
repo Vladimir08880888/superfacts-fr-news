@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: superfacts-fr-news
+    runtime: node
+    plan: free  # можно изменить на starter для production
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+    autoDeploy: false
+    branch: main
