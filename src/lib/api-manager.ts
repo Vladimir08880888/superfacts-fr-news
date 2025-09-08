@@ -25,36 +25,6 @@ export class ApiKeyManager {
     );
     this.apiKeys.set(demoKey.key, demoKey);
 
-    // API Key premium
-    const premiumKey = this.generateApiKey(
-      'premium-user',
-      'Premium API Key',
-      [
-        {
-          resource: 'articles',
-          actions: ['read'],
-          constraints: { maxResults: 500 }
-        },
-        {
-          resource: 'sentiment',
-          actions: ['read']
-        },
-        {
-          resource: 'fact-check',
-          actions: ['read']
-        },
-        {
-          resource: 'recommendations',
-          actions: ['read']
-        }
-      ],
-      {
-        requestsPerMinute: 100,
-        requestsPerHour: 5000,
-        requestsPerDay: 50000
-      }
-    );
-    this.apiKeys.set(premiumKey.key, premiumKey);
   }
 
   public generateApiKey(
@@ -339,16 +309,11 @@ export class ApiKeyManager {
   public createApiKey(
     userId: string,
     name: string,
-    permissions: ApiPermission[],
-    tier: 'free' | 'premium' | 'enterprise' = 'free'
+    permissions: ApiPermission[]
   ): ApiKey {
-    const rateLimits = {
-      free: { requestsPerMinute: 30, requestsPerHour: 1000, requestsPerDay: 5000 },
-      premium: { requestsPerMinute: 100, requestsPerHour: 5000, requestsPerDay: 50000 },
-      enterprise: { requestsPerMinute: 500, requestsPerHour: 25000, requestsPerDay: 1000000 }
-    };
+    const rateLimit = { requestsPerMinute: 30, requestsPerHour: 1000, requestsPerDay: 5000 };
 
-    const apiKey = this.generateApiKey(userId, name, permissions, rateLimits[tier]);
+    const apiKey = this.generateApiKey(userId, name, permissions, rateLimit);
     this.apiKeys.set(apiKey.key, apiKey);
     
     return apiKey;

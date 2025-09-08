@@ -74,21 +74,9 @@ export interface SuperFactsApiConfig {
     website: string;
   };
   rateLimit: {
-    free: {
-      requestsPerMinute: number;
-      requestsPerHour: number;
-      requestsPerDay: number;
-    };
-    premium: {
-      requestsPerMinute: number;
-      requestsPerHour: number;
-      requestsPerDay: number;
-    };
-    enterprise: {
-      requestsPerMinute: number;
-      requestsPerHour: number;
-      requestsPerDay: number;
-    };
+    requestsPerMinute: number;
+    requestsPerHour: number;
+    requestsPerDay: number;
   };
   endpoints: ApiEndpoint[];
 }
@@ -128,21 +116,9 @@ export const API_CONFIG: SuperFactsApiConfig = {
     website: 'https://superfacts.fr/support'
   },
   rateLimit: {
-    free: {
-      requestsPerMinute: 30,
-      requestsPerHour: 1000,
-      requestsPerDay: 5000
-    },
-    premium: {
-      requestsPerMinute: 100,
-      requestsPerHour: 5000,
-      requestsPerDay: 50000
-    },
-    enterprise: {
-      requestsPerMinute: 500,
-      requestsPerHour: 25000,
-      requestsPerDay: 1000000
-    }
+    requestsPerMinute: 30,
+    requestsPerHour: 1000,
+    requestsPerDay: 5000
   },
   endpoints: [
     {

@@ -6,6 +6,7 @@ export interface Advertisement {
   imageUrl?: string;
   videoUrl?: string;
   targetUrl: string;
+  customCode?: string; // For external ad networks (AdSense, etc.)
   advertiser: Advertiser;
   campaign: Campaign;
   targeting: AdTargeting;

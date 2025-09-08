@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://superfacts.fr/sitemap.xml
+
+# Disallow search parameter URLs to avoid duplicate content
+Disallow: /*?search=
+Disallow: /*?category=
+Disallow: /*?page=
+
+# Allow common assets
+Allow: /images/
+Allow: /logos/
+Allow: /*.css
+Allow: /*.js
+
+# Host directive for preferred domain
+Host: https://superfacts.fr

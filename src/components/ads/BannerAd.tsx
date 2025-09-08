@@ -143,6 +143,33 @@ export default function BannerAd({ placement, className = '', userContext }: Ban
   const { ad } = adData;
   const dimensions = getBannerDimensions(placement);
 
+  // Handle custom code (e.g., Google AdSense)
+  if (ad.customCode) {
+    return (
+      <motion.div
+        id={`banner-ad-${ad.id}`}
+        className={`banner-ad custom-ad relative ${className}`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        style={{ maxWidth: dimensions.width }}
+      >
+        {/* Sponsored label */}
+        <div className="absolute top-1 left-1 z-10">
+          <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded text-opacity-90">
+            Sponsorisé
+          </span>
+        </div>
+        
+        {/* Custom ad code (AdSense, etc.) */}
+        <div 
+          className="custom-ad-content"
+          dangerouslySetInnerHTML={{ __html: ad.customCode }}
+        />
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       id={`banner-ad-${ad.id}`}

@@ -76,5 +76,11 @@
     "NODE_ENV": "production"
   },
   "regions": ["cdg1"],
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "crons": [
+    {
+      "path": "/api/collect",
+      "schedule": "0 */3 * * *"
+    }
+  ]
 }

@@ -10,6 +10,7 @@ import { useTranslatedText, useTranslation } from '@/contexts/TranslationContext
 import { useBookmarks } from '@/contexts/BookmarksContext';
 import SocialShare from '@/components/SocialShare';
 import { PDFGenerator } from '@/lib/pdf-generator';
+import { useAnalytics, useArticleTimeTracking } from '@/hooks/useAnalytics';
 
 interface ArticleCardProps {
   article: Article;
@@ -26,6 +27,10 @@ interface ArticleCardProps {
 export function ArticleCard({ article, variant = 'default', index = 0, sentiment }: ArticleCardProps) {
   const { currentLanguage } = useTranslation();
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarks();
+  const analytics = useAnalytics();
+  
+  // Track time spent viewing this article card
+  useArticleTimeTracking(article.id);
   const { translatedText: translatedTitle, isLoading: titleLoading } = useTranslatedText(article.title, [article.id]);
   const { translatedText: translatedSummary, isLoading: summaryLoading } = useTranslatedText(article.summary, [article.id]);
   const { translatedText: translatedCategory } = useTranslatedText(article.category, []);
@@ -44,9 +49,29 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
     }
   };
   
+  const handleArticleClick = () => {
+    // Track article click
+    analytics.trackArticleClick(article.id, article.title, article.category, article.source);
+    
+    // Track content consumption for enhanced ecommerce
+    analytics.trackContentConsumption(article.id, article.title, article.category, 1);
+    
+    // Notify reading session tracking
+    if ((window as any).trackArticleRead) {
+      (window as any).trackArticleRead(article.id, article.category);
+    }
+  };
+  
   const handlePDFDownload = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Track PDF download
+    analytics.track('pdf_download', 'engagement', 'article_pdf', undefined, {
+      article_id: article.id,
+      article_title: article.title,
+      article_category: article.category
+    });
     
     try {
       // Prepare translated content for PDF
@@ -193,6 +218,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
               <Link 
                 href={`/articles/${article.id}`}
                 className="block hover:text-blue-600 transition-colors duration-200"
+                onClick={handleArticleClick}
               >
                 <div className="flex items-start gap-2">
                   <h3 className={cn(
@@ -332,6 +358,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
             <Link 
               href={`/articles/${article.id}`}
               className="block"
+              onClick={handleArticleClick}
             >
               <div className="flex items-start gap-2 mb-2">
                 <h2 className={cn(
@@ -401,6 +428,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
               <Link 
                 href={`/articles/${article.id}`}
                 className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                onClick={handleArticleClick}
               >
                 <span className="text-sm font-medium">Lire l'article</span>
               </Link>
@@ -503,6 +531,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
         <Link 
           href={`/articles/${article.id}`}
           className="block mb-3"
+          onClick={handleArticleClick}
         >
           <div className="flex items-start gap-2">
             <h3 className={cn(
@@ -558,6 +587,7 @@ export function ArticleCard({ article, variant = 'default', index = 0, sentiment
             <Link 
               href={`/articles/${article.id}`}
               className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors duration-200"
+              onClick={handleArticleClick}
             >
               <span className="text-sm">Lire</span>
             </Link>

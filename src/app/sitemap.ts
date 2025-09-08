@@ -3,48 +3,79 @@ import { FrenchNewsCollector } from '@/lib/news-collector';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://superfacts.fr';
-  const collector = new FrenchNewsCollector();
   
   try {
+    const collector = new FrenchNewsCollector();
     const articles = await collector.getArticles();
     
     // Pages principales
-    const routes = [
+    const mainRoutes: MetadataRoute.Sitemap = [
       {
         url: baseUrl,
         lastModified: new Date(),
-        changeFrequency: 'hourly' as const,
-        priority: 1,
+        changeFrequency: 'hourly',
+        priority: 1.0,
+      },
+      {
+        url: `${baseUrl}/about`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly', 
+        priority: 0.6,
+      },
+      {
+        url: `${baseUrl}/contact`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.5,
       },
     ];
 
-    // Articles récents (derniers 50)
-    const recentArticles = articles.slice(0, 50).map((article) => ({
-      url: article.sourceUrl,
+    // Articles internes (si vous avez des pages d'articles dédiées)
+    const articleRoutes: MetadataRoute.Sitemap = articles.slice(0, 100).map((article) => ({
+      url: `${baseUrl}/article/${article.id}`,
       lastModified: new Date(article.publishDate),
-      changeFrequency: 'daily' as const,
+      changeFrequency: 'weekly',
       priority: 0.8,
     }));
 
-    // Catégories
-    const categories = ['Politique', 'Économie', 'Tech', 'Sport', 'Culture', 'Sciences', 'Santé', 'International'];
-    const categoryRoutes = categories.map((category) => ({
-      url: `${baseUrl}?category=${encodeURIComponent(category)}`,
+    // Catégories avec URLs SEO-friendly
+    const categories = [
+      { slug: 'politique', name: 'Politique' },
+      { slug: 'economie', name: 'Économie' },
+      { slug: 'technologie', name: 'Tech' },
+      { slug: 'sport', name: 'Sport' },
+      { slug: 'culture', name: 'Culture' },
+      { slug: 'sciences', name: 'Sciences' },
+      { slug: 'sante', name: 'Santé' },
+      { slug: 'international', name: 'International' }
+    ];
+    
+    const categoryRoutes: MetadataRoute.Sitemap = categories.map((category) => ({
+      url: `${baseUrl}/category/${category.slug}`,
       lastModified: new Date(),
-      changeFrequency: 'daily' as const,
+      changeFrequency: 'hourly',
       priority: 0.7,
     }));
 
-    return [...routes, ...categoryRoutes, ...recentArticles];
+    // Sources médias principales
+    const sources = ['le-monde', 'le-figaro', 'liberation', 'france-24', 'bfmtv'];
+    const sourceRoutes: MetadataRoute.Sitemap = sources.map((source) => ({
+      url: `${baseUrl}/source/${source}`,
+      lastModified: new Date(),
+      changeFrequency: 'hourly',
+      priority: 0.6,
+    }));
+
+    return [...mainRoutes, ...categoryRoutes, ...sourceRoutes, ...articleRoutes];
   } catch (error) {
     console.error('Erreur lors de la génération du sitemap:', error);
-    // Retour vers un sitemap basique en cas d'erreur
+    // Sitemap basique en cas d'erreur
     return [
       {
         url: baseUrl,
         lastModified: new Date(),
         changeFrequency: 'hourly',
-        priority: 1,
+        priority: 1.0,
       },
     ];
   }

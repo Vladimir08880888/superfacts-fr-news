@@ -10,7 +10,8 @@
     "test": "jest",
     "collect-news": "node -e \"const { FrenchNewsCollector } = require('./dist/lib/news-collector.js'); const collector = new FrenchNewsCollector(); collector.collectNews().then(result => console.log('Collecté', result.newArticles, 'nouveaux articles'));\"",
     "collect-news-ts": "npx tsx -e \"import { FrenchNewsCollector } from './src/lib/news-collector'; const collector = new FrenchNewsCollector(); collector.collectNews().then(result => console.log('Collecté', result.newArticles, 'nouveaux articles'));\"",
-    "init-ads": "npx tsx scripts/init-ads.ts"
+    "init-ads": "npx tsx scripts/init-ads.ts",
+    "site-verification": "node scripts/google-site-verification.js"
   },
   "dependencies": {
     "@next/font": "^14.2.15",

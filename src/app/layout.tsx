@@ -6,6 +6,8 @@ import { BookmarksProvider } from '@/contexts/BookmarksContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { RecommendationsProvider } from '@/contexts/RecommendationsContext';
 import { UserProvider } from '@/contexts/UserContext';
+import Footer from '@/components/Footer';
+import MobileStickyAd from '@/components/ads/MobileStickyAd';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,13 +26,18 @@ export const metadata: Metadata = {
   },
   description: "Découvrez toute l'actualité française agrégée en temps réel depuis les plus grandes sources d'information : Le Monde, Le Figaro, France 24, Liberation, BFM TV et bien plus.",
   keywords: [
-    "actualités", "news", "france", "information", "journal", "presse", 
-    "politique", "économie", "sport", "culture", "international", "technologie",
-    "Le Monde", "Le Figaro", "France 24", "BFM TV", "temps réel"
+    "actualités france", "news france", "information temps réel", "journal français", "presse française", 
+    "politique france", "économie française", "sport france", "culture france", "international france", "technologie france",
+    "Le Monde actualités", "Le Figaro news", "France 24 direct", "BFM TV live", "Liberation info",
+    "agrégateur actualités", "flux RSS france", "breaking news france", "dernières nouvelles"
   ],
-  authors: [{ name: "SuperFacts Team" }],
+  authors: [{ name: "SuperFacts Team", url: "https://superfacts.fr" }],
   creator: "SuperFacts.fr",
   publisher: "SuperFacts.fr",
+  applicationName: "SuperFacts",
+  referrer: "origin-when-cross-origin",
+  category: "News",
+  classification: "News Aggregator",
   formatDetection: {
     email: false,
     address: false,
@@ -39,6 +46,12 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://superfacts.fr'),
   alternates: {
     canonical: '/',
+    languages: {
+      'fr-FR': '/',
+      'en-US': '/en',
+      'es-ES': '/es',
+      'de-DE': '/de',
+    },
   },
   openGraph: {
     title: "SuperFacts.fr - Actualités françaises en temps réel",
@@ -113,6 +126,77 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="theme-color" content="#3b82f6" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        {/* Google AdSense Site Verification */}
+        <meta name="google-adsense-account" content="ca-pub-6810963346035851" />
+        {/* Google Analytics */}
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}', {
+                    page_title: document.title,
+                    page_location: window.location.href,
+                    cookie_flags: 'secure;samesite=none',
+                    anonymize_ip: true,
+                    allow_google_signals: false,
+                    allow_ad_personalization_signals: false
+                  });
+                `,
+              }}
+            />
+          </>
+        )}
+        {/* Google AdSense */}
+        {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
+            crossOrigin="anonymous"
+          />
+        )}
+        {/* Структурированные данные JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "NewsMediaOrganization",
+              "name": "SuperFacts.fr",
+              "url": "https://superfacts.fr",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://superfacts.fr/logo.png",
+                "width": 512,
+                "height": 512
+              },
+              "sameAs": [
+                "https://twitter.com/superfacts_fr",
+                "https://facebook.com/superfacts.fr"
+              ],
+              "description": "Actualités françaises en temps réel agrégées depuis les plus grandes sources d'information",
+              "foundingDate": "2024",
+              "address": {
+                "@type": "PostalAddress",
+                "addressCountry": "FR"
+              },
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "customer service",
+                "email": "contact@superfacts.fr"
+              },
+              "publishingPrinciples": "https://superfacts.fr/editorial-guidelines",
+              "ethicsPolicy": "https://superfacts.fr/ethics"
+            }),
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -146,6 +230,8 @@ export default function RootLayout({
               <BookmarksProvider>
                 <RecommendationsProvider>
                   {children}
+                  <Footer />
+                  <MobileStickyAd />
                 </RecommendationsProvider>
               </BookmarksProvider>
             </TranslationProvider>

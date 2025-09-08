@@ -250,6 +250,7 @@ export function Header({ onSearch, onCategoryFilter, onCollectNews, isCollecting
             <div className="hidden md:flex items-center space-x-4">
               <LanguageSelector variant="compact" />
               
+              
               {/* Sources Button */}
               <Link href="/sources">
                 <motion.button
